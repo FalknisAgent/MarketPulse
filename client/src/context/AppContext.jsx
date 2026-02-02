@@ -193,7 +193,8 @@ export function AppProvider({ children }) {
         // Check cache unless forcing refresh
         if (!forceRefresh) {
             const cached = storage.getCachedData(upperSymbol);
-            if (cached) {
+            // Verify cache has required full data (financials and score)
+            if (cached && cached.financials && cached.buffettScore) {
                 dispatch({
                     type: ACTIONS.SET_STOCK_DATA,
                     payload: { symbol: upperSymbol, data: cached }

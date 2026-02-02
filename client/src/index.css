@@ -1,52 +1,55 @@
 :root {
-  /* --- TRUST & FINANCIAL PALETTE --- */
+  /* --- LOVABLE / MODERN SAAS PALETTE --- */
 
   /* Backgrounds */
-  --color-bg-app: #f4f7fa;
-  /* Clean, professional off-white/blue tint */
-  --color-bg-sidebar: #ffffff;
-  /* Solid white for structure */
+  --color-bg-app: #f8fafc;
+  /* Slate 50 - Very light gray background */
   --color-bg-card: #ffffff;
-  /* Solid white for data clarity */
+  /* Pure White Cards */
   --color-bg-header: #ffffff;
-  /* Solid white header */
+  /* White Header */
+  --color-bg-sidebar: #ffffff;
+  /* White Sidebar */
+  --color-bg-hover: #f1f5f9;
+  /* Slate 100 for hovers */
 
   /* Text */
   --color-text-primary: #0f172a;
-  /* Deep Navy/Black */
-  --color-text-secondary: #475569;
-  /* Cool Gray */
+  /* Slate 900 - Deep, sharp black */
+  --color-text-secondary: #64748b;
+  /* Slate 500 - Muted but legible */
   --color-text-muted: #94a3b8;
-  /* Light Gray */
+  /* Slate 400 - Subtler */
 
-  /* TRUST BLUE - The "Financial" Color */
-  --color-accent: #0052cc;
-  /* Professional Royal Blue (Atlassian/Chase style) */
-  --color-accent-hover: #0747a6;
-  /* Darker interaction state */
-  --color-accent-soft: rgba(0, 82, 204, 0.08);
-  /* Subtle background tint */
-  --color-accent-glow: rgba(0, 82, 204, 0.15);
+  /* Accent Colors */
+  --color-accent: #000000;
+  /* Black for primary actions/tabs (Modern/Minimal) */
+  --color-accent-blue: #0f62fe;
+  /* Royal Blue for links/highlights */
 
-  /* Status Colors */
-  --color-success: #059669;
-  /* Trustworthy Green */
+  /* Status Colors (From Screenshots) */
+  --color-success: #16a34a;
+  /* Green 600 */
+  --color-success-bg: #dcfce7;
+  /* Green 100 */
   --color-danger: #dc2626;
-  /* Alert Red */
+  /* Red 600 */
+  --color-danger-bg: #fee2e2;
+  /* Red 100 */
   --color-warning: #d97706;
-  /* Caution Yellow */
+  /* Amber 600 */
 
-  /* Borders & Separators */
+  /* Borders */
   --color-border: #e2e8f0;
-  /* Structured Light Gray */
-  --color-separator: #f1f5f9;
+  /* Slate 200 - Subtle */
+  --color-border-hover: #cbd5e1;
+  /* Slate 300 */
 
-  /* --- LAYOUT GRID SYSTEM --- */
-  /* Strict Horizontal Alignment Variable */
-  --layout-padding-x: 32px;
-  /* Consistent left/right padding for Header & Content */
+  /* Spacing & Layout */
+  --layout-padding-x: 40px;
+  /* Generous padding */
+  --card-padding: 24px;
 
-  /* Spacing */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;
@@ -54,32 +57,32 @@
   --space-xl: 32px;
 
   /* Radius */
-  --radius-sm: 4px;
+  --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
+  --radius-xl: 16px;
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.02), 0 2px 4px -1px rgb(0 0 0 / 0.02);
+  /* Ultra subtle */
+  --shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 0.05);
 
-  /* Transitions */
-  --transition-fast: 0.2s ease-in-out;
+  /* Fonts */
+  --font-family: 'Inter', -apple-system, sans-serif;
 }
 
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-bg-app);
   color: var(--color-text-primary);
-  min-height: 100vh;
 }
 
-/* Reset & Base */
+/* Reset */
 * {
   box-sizing: border-box;
 }
@@ -93,7 +96,6 @@ h6 {
   margin: 0;
   font-weight: 600;
   color: var(--color-text-primary);
-  letter-spacing: -0.01em;
 }
 
 p {
@@ -120,10 +122,6 @@ button {
   border-radius: var(--radius-full);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
 /* Utilities */
 .text-success {
   color: var(--color-success);
@@ -147,31 +145,48 @@ button {
   width: 100%;
 }
 
+/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-sm);
-  padding: 10px 16px;
+  gap: 8px;
+  padding: 8px 16px;
   border-radius: var(--radius-md);
   font-weight: 500;
-  transition: all var(--transition-fast);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: var(--color-text-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
 }
 
 .btn-secondary {
   background: white;
-  color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
 }
 
 .btn-secondary:hover {
-  background: var(--color-bg-app);
-  color: var(--color-text-primary);
-  border-color: #cbd5e1;
+  background: var(--color-bg-hover);
 }
 
-/* --- APP LAYOUT --- */
+.btn-ghost {
+  color: var(--color-text-secondary);
+}
+
+.btn-ghost:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+/* --- LAYOUT --- */
 #root {
   width: 100%;
   height: 100vh;
@@ -180,7 +195,6 @@ button {
 .app-layout {
   display: flex;
   height: 100vh;
-  overflow: hidden;
   background: var(--color-bg-app);
 }
 
@@ -195,31 +209,85 @@ button {
 
 .content-area {
   flex: 1;
-  /* STRICT ALIGNMENT: Matches Header padding */
-  padding: var(--space-xl) var(--layout-padding-x);
+  padding: 32px var(--layout-padding-x);
   overflow-y: auto;
   padding-bottom: 6rem;
 }
 
+/* --- HEADER --- */
+header.header {
+  height: 72px;
+  background: var(--color-bg-header);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--layout-padding-x);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.header-left {
+  margin-right: 48px;
+}
+
+.header-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.header-center {
+  flex: 0 1 480px;
+}
+
+/* Search Bar - Clean & White */
+.search-container input {
+  width: 100%;
+  padding: 10px 16px;
+  padding-left: 44px;
+  /* Icon on LEFT per new request? Waiting on logic. Reverting to LEFT as per standard SaaS unless defined otherwise. Let's stick to Right if user liked it, but Lovable usually has it left. Screenshot shows Left. */
+  /* Screenshot check: The Lovable screenshot shows "Search stocks..." with icon on LEFT. I will move it back to LEFT to match screenshot. */
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  background: white;
+}
+
+.search-container input:focus {
+  outline: none;
+  border-color: var(--color-accent-blue);
+  box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  /* BACK TO LEFT TO MATCH SCREENSHOT */
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  width: 18px;
+  height: 18px;
+}
+
 /* --- SIDEBAR --- */
 .sidebar {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
   width: 260px;
   background: var(--color-bg-sidebar);
   border-right: 1px solid var(--color-border);
-  flex-shrink: 0;
-  z-index: 10;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar-header {
-  height: 70px;
-  /* Fixed height to match header */
+  height: 72px;
   display: flex;
   align-items: center;
   padding: 0 24px;
-  /* Align visually */
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -230,21 +298,21 @@ button {
 }
 
 .logo-icon {
-  color: var(--color-accent);
+  color: var(--color-accent-blue);
 }
 
 .logo-text {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--color-text-primary);
 }
 
 .sidebar-nav {
-  flex: 1;
   padding: 24px 16px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1;
 }
 
 .nav-item {
@@ -252,23 +320,21 @@ button {
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  width: 100%;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 500;
   color: var(--color-text-secondary);
   border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
+  transition: all 0.2s;
 }
 
 .nav-item:hover {
-  background: var(--color-bg-app);
+  background: var(--color-bg-hover);
   color: var(--color-text-primary);
 }
 
 .nav-item.active {
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
-  /* Active Trust Blue */
+  background: #eff6ff;
+  color: var(--color-accent-blue);
   font-weight: 600;
 }
 
@@ -276,181 +342,39 @@ button {
   margin-left: auto;
   padding: 2px 8px;
   font-size: 0.75rem;
-  background: var(--color-bg-app);
+  background: #f1f5f9;
   border-radius: 99px;
   color: var(--color-text-secondary);
 }
 
 .nav-item.active .nav-badge {
-  background: white;
-  color: var(--color-accent);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  background: #dbeafe;
+  color: var(--color-accent-blue);
 }
 
-.sidebar-stats {
-  padding: 24px;
-  background: var(--color-bg-app);
-  border-top: 1px solid var(--color-border);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.stat-card {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.stat-label {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-secondary);
-  font-weight: 600;
-}
-
-.stat-value {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.sidebar-footer {
-  padding: 16px 24px;
-  border-top: 1px solid var(--color-border);
-}
-
-/* --- HEADER --- */
-header.header {
-  height: 70px;
-  /* Fixed height structure */
-  background: var(--color-bg-header);
-  border-bottom: 1px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  /* STRICT ALIGNMENT: Using the defined variable */
-  padding: 0 var(--layout-padding-x);
-  z-index: 5;
-}
-
-.header-content {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  /* Left align everything */
-  width: 100%;
-  height: 100%;
-  gap: 0;
-  /* Control gap manually */
-}
-
-/* Title Left aligned */
-.header-left {
-  flex: 0 0 auto;
-  margin-right: 48px;
-  /* Distinct spacing between title and search */
-}
-
-.header-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-/* VISIBLE SEARCH BAR */
-.header-center {
-  flex: 0 1 400px;
-  /* Fixed optimal width */
-}
-
-/* Search Input Styling (Assuming StockSearch uses standard input) */
-.search-container input {
-  width: 100%;
-  padding: 10px 16px;
-  padding-left: 16px;
-  padding-right: 40px;
-  /* Space for icon on the right */
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-app);
-  font-size: 0.9rem;
-  transition: all var(--transition-fast);
-}
-
-.search-container input:focus {
-  outline: none;
-  border-color: var(--color-accent);
-  background: white;
-  box-shadow: 0 0 0 3px var(--color-accent-soft);
-}
-
-.search-icon {
-  position: absolute;
-  right: 12px;
-  /* Moved to right */
-  left: auto;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--color-text-muted);
-  pointer-events: none;
-}
-
-.header-right {
-  margin-left: auto;
-  /* Push to right */
-}
-
-/* --- CARDS & GRID --- */
+/* --- CARD LIST --- */
 .stocks-list {
-  display: grid;
-  /* Responsive grid with min-width */
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
-  padding-bottom: 32px;
-}
-
-.card-glass {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
-  transition: all var(--transition-fast);
-  padding: 24px;
   display: flex;
   flex-direction: column;
+  gap: 24px;
+  max-width: 1000px;
+  /* List view as per screenshot? Or still Grid? Screenshot shows ONE card expansively. Let's keep Grid but make them full width or consistent. Screenshot is one large card. */
+  /* User said "The Screenshots are just mockups... content remains". Content can be grid. But detail view is wide. */
+  /* Let's stick to Grid for list, Detailed Card for individual. */
+  display: grid;
+  grid-template-columns: 1fr;
+  /* Force 1 column for the "Detailed" look in the screenshot? No, user might want a grid. */
+  /* Let's stick to the previous grid but style the cards to look like the screenshot */
+  grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+  /* Wide cards */
 }
 
-.card-glass:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: #cbd5e1;
-}
-
-.empty-state {
-  margin-top: 40px;
-  padding: 80px 20px;
-  text-align: center;
-  background: white;
-  border-radius: var(--radius-lg);
-  border: 1px dashed var(--color-border);
-  color: var(--color-text-secondary);
-}
-
-.empty-icon {
-  font-size: 3rem;
-  margin-bottom: 16px;
-  opacity: 0.5;
-  color: var(--color-accent);
-}
-
-/* --- DISCLAIMER --- */
+/* Disclaimer */
 .app-footer {
   position: absolute;
   bottom: 0;
-  left: 0;
   width: 100%;
-  padding: 16px;
+  padding: 24px;
   display: flex;
   justify-content: center;
   pointer-events: none;
@@ -459,17 +383,12 @@ header.header {
 .disclaimer-text {
   background: white;
   border: 1px solid var(--color-border);
-  padding: 12px 24px;
+  padding: 16px 32px;
   border-radius: 99px;
   font-size: 0.75rem;
   color: var(--color-text-muted);
-  box-shadow: var(--shadow-md);
-  pointer-events: auto;
-  max-width: 90%;
+  box-shadow: var(--shadow-hover);
+  max-width: 900px;
   text-align: center;
-}
-
-.disclaimer-text strong {
-  color: var(--color-text-secondary);
-  margin-right: 5px;
+  pointer-events: auto;
 }

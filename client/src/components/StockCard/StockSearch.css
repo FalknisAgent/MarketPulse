@@ -1,55 +1,121 @@
+/* --- STOCK SEARCH (Lovable Style) --- */
+
 .stock-search {
     position: relative;
     width: 100%;
 }
 
-.search-input {
-    padding-right: 80px;
+.input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
 }
 
+/* Icon - Strictly Left */
+.input-icon {
+    position: absolute;
+    left: 14px;
+    color: #94a3b8;
+    /* Muted gray */
+    pointer-events: none;
+    z-index: 2;
+}
+
+.search-input {
+    width: 100%;
+    height: 44px;
+    /* Matches standard touch target / screenshot look */
+    padding: 0 44px;
+    /* Equal padding left/right (left for icon, right for X) */
+    padding-left: 44px;
+
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    /* Slightly rounded, not pill */
+
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--color-text-primary);
+
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    /* Very subtle depth */
+}
+
+/* Placeholder specific styling */
+.search-input::placeholder {
+    color: #cbd5e1;
+    /* Lighter than text-secondary */
+    font-weight: 400;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--color-accent-blue);
+    box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.1);
+}
+
+.search-input:hover {
+    border-color: #cbd5e1;
+}
+
+/* Clear Button */
 .search-clear {
     position: absolute;
-    right: 40px;
-    top: 50%;
-    transform: translateY(-50%);
+    right: 12px;
     padding: 4px;
-    color: var(--color-text-muted);
+    color: #94a3b8;
     background: none;
     border: none;
     cursor: pointer;
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-fast);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .search-clear:hover {
-    color: var(--color-text-primary);
-    background: var(--color-bg-hover);
+    background: #f1f5f9;
+    color: #64748b;
 }
 
+/* Spinner */
 .search-spinner {
     position: absolute;
-    right: var(--space-md);
-    top: 50%;
-    transform: translateY(-50%);
+    right: 12px;
 }
 
 .search-spinner .spinner {
     width: 18px;
     height: 18px;
+    border: 2px solid #e2e8f0;
+    border-top-color: var(--color-accent-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
 }
 
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Dropdown */
 .search-dropdown {
     position: absolute;
-    top: calc(100% + var(--space-sm));
+    top: calc(100% + 8px);
     left: 0;
     right: 0;
-    background: var(--color-bg-elevated);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
-    max-height: 300px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    max-height: 360px;
     overflow-y: auto;
     z-index: 1000;
+    padding: 8px 0;
 }
 
 .search-result {
@@ -57,61 +123,51 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: var(--space-md);
+    padding: 10px 16px;
     background: none;
     border: none;
-    border-bottom: 1px solid var(--color-border);
     cursor: pointer;
-    transition: background var(--transition-fast);
     text-align: left;
-}
-
-.search-result:last-child {
-    border-bottom: none;
+    transition: background 0.1s;
 }
 
 .search-result:hover:not(:disabled) {
-    background: var(--color-bg-hover);
+    background: #f8fafc;
 }
 
 .search-result:disabled {
-    cursor: default;
-    opacity: 0.6;
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .result-info {
     display: flex;
     flex-direction: column;
-    gap: 2px;
 }
 
 .result-symbol {
     font-weight: 600;
-    color: var(--color-text-primary);
+    font-size: 0.95rem;
+    color: #0f172a;
 }
 
 .result-name {
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    color: #64748b;
 }
 
 .result-action {
-    color: var(--color-accent);
+    color: #94a3b8;
 }
 
-.result-added {
-    font-size: 0.75rem;
-    color: var(--color-success);
-    font-weight: 500;
+.search-result:hover .result-action {
+    color: var(--color-accent-blue);
 }
 
 .search-empty,
 .search-error {
-    padding: var(--space-lg);
+    padding: 24px;
     text-align: center;
-    color: var(--color-text-muted);
-}
-
-.search-error {
-    color: var(--color-danger);
+    color: #64748b;
+    font-size: 0.9rem;
 }

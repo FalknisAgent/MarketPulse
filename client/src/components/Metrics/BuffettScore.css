@@ -1,85 +1,73 @@
-.buffett-score-card {
-    background: var(--color-bg-tertiary);
-    border-radius: var(--radius-md);
-    padding: var(--space-lg);
-    text-align: center;
-}
-
-.buffett-score-card h4 {
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--color-text-muted);
-    margin-bottom: var(--space-md);
-}
-
-.score-gauge {
+.buffett-score-gauge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: relative;
     width: 100%;
-    max-width: 200px;
-    margin: 0 auto var(--space-md);
+}
+
+.gauge-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    /* The SVG is 160px wide (radius 80 * 2) */
+    width: 160px;
+    height: 90px;
+    /* slightly more than radius for stroke cap */
+    overflow: visible;
 }
 
 .gauge-svg {
-    width: 100%;
-    height: auto;
+    overflow: visible;
+    display: block;
 }
 
-.score-value {
+.gauge-progress {
+    transition: stroke-dashoffset 1s ease-out;
+    /* Optional: Small drop shadow for depth like screenshot? */
+    /* filter: drop-shadow(0 0 4px rgba(0,0,0,0.1)); */
+}
+
+.gauge-value {
     position: absolute;
     bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
     display: flex;
     align-items: baseline;
     gap: 2px;
 }
 
-.score-number {
+.current-score {
     font-size: 2.5rem;
     font-weight: 700;
     line-height: 1;
 }
 
-.score-max {
-    font-size: 1rem;
-    color: var(--color-text-muted);
+.max-score {
+    font-size: 0.9rem;
     font-weight: 500;
+    color: #94a3b8;
 }
 
-.recommendation {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-sm);
-    padding: var(--space-md);
-    border-radius: var(--radius-md);
-    font-weight: 500;
-    font-size: 0.875rem;
-    margin-bottom: var(--space-md);
+/* Loading State */
+.skeleton-circle {
+    width: 120px;
+    height: 60px;
+    border-top-left-radius: 120px;
+    border-top-right-radius: 120px;
+    background: #f1f5f9;
+    animation: pulse 1.5s infinite;
 }
 
-.recommendation-excellent {
-    background: var(--color-success-bg);
-    color: var(--color-success);
-}
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
 
-.recommendation-good {
-    background: rgba(34, 197, 94, 0.15);
-    color: #22c55e;
-}
+    50% {
+        opacity: 1;
+    }
 
-.recommendation-fair {
-    background: var(--color-warning-bg);
-    color: var(--color-warning);
-}
-
-.recommendation-poor {
-    background: var(--color-danger-bg);
-    color: var(--color-danger);
-}
-
-.metrics-summary {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
+    100% {
+        opacity: 0.6;
+    }
 }

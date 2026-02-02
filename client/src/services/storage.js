@@ -147,7 +147,9 @@ export function setCachedData(symbol, data) {
         // Store only essential data to minimize size
         const minimalData = {
             quote: data.quote,
-            // Skip historical and financials as they are large
+            financials: data.financials,
+            historical: data.historical,
+            buffettScore: data.buffettScore
         };
 
         cache[symbol.toUpperCase()] = {

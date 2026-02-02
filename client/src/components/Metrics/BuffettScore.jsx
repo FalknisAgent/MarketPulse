@@ -1,90 +1,71 @@
-import { TrendingUp, ShieldCheck, AlertTriangle, XCircle, HelpCircle } from 'lucide-react';
 import './BuffettScore.css';
 
 function BuffettScore({ score }) {
     if (!score) {
         return (
-            <div className="buffett-score-card loading">
-                <div className="skeleton" style={{ width: '100%', height: 200 }}></div>
+            <div className="buffett-score-gauge loading">
+                <div className="skeleton-circle"></div>
             </div>
         );
     }
 
+    const { score: scoreVal } = score;
+
     const getScoreColor = () => {
-        if (score.score >= 80) return 'var(--color-success)';
-        if (score.score >= 60) return '#22c55e';
-        if (score.score >= 40) return 'var(--color-warning)';
+        if (scoreVal >= 80) return 'var(--color-success)';
+        if (scoreVal >= 60) return '#22c55e';
+        if (scoreVal >= 40) return 'var(--color-warning)';
         return 'var(--color-danger)';
     };
 
-    const getRecommendationIcon = () => {
-        switch (score.recommendation) {
-            case 'strongBuy': return <ShieldCheck size={24} />;
-            case 'consider': return <TrendingUp size={24} />;
-            case 'hold': return <HelpCircle size={24} />;
-            default: return <XCircle size={24} />;
-        }
-    };
-
-    const getRecommendationClass = () => {
-        switch (score.recommendation) {
-            case 'strongBuy': return 'excellent';
-            case 'consider': return 'good';
-            case 'hold': return 'fair';
-            default: return 'poor';
-        }
-    };
-
-    // Calculate gauge arc
-    const radius = 70;
-    const circumference = Math.PI * radius; // Half circle
-    const offset = circumference - (score.score / 100) * circumference;
+    // Gauge calculations
+    const radius = 80;
+    const stroke = 12;
+    const normalizedRadius = radius - stroke * 2;
+    const circumference = normalizedRadius * 2 * Math.PI;
+    // We want a semi-circle (0 to 180 degrees), so max offset is half circumference?
+    // Actually, easier to use strokeDasharray for semi-circle.
+    // Length of semi-circle arc = Pi * r
+    const arcLength = Math.PI * normalizedRadius;
+    const strokeDashoffset = arcLength - ((scoreVal / 100) * arcLength);
 
     return (
-        <div className="buffett-score-card">
-            <h4>Buffett Score</h4>
-
-            <div className="score-gauge">
-                <svg viewBox="0 0 160 100" className="gauge-svg">
-                    {/* Background arc */}
+        <div className="buffett-score-gauge">
+            <div className="gauge-wrapper">
+                <svg
+                    height={radius}
+                    width={radius * 2}
+                    viewBox={`0 0 ${radius * 2} ${radius}`}
+                    className="gauge-svg"
+                >
+                    {/* Background Arc */}
                     <path
-                        d="M 10 90 A 70 70 0 0 1 150 90"
+                        d={`M${stroke} ${radius} a ${normalizedRadius} ${normalizedRadius} 0 0 1 ${normalizedRadius * 2} 0`}
                         fill="none"
-                        stroke="var(--color-bg-tertiary)"
-                        strokeWidth="12"
+                        stroke="#e2e8f0"
+                        strokeWidth={stroke}
                         strokeLinecap="round"
                     />
-                    {/* Value arc */}
+                    {/* Progress Arc */}
                     <path
-                        d="M 10 90 A 70 70 0 0 1 150 90"
+                        d={`M${stroke} ${radius} a ${normalizedRadius} ${normalizedRadius} 0 0 1 ${normalizedRadius * 2} 0`}
                         fill="none"
                         stroke={getScoreColor()}
-                        strokeWidth="12"
+                        strokeWidth={stroke}
+                        strokeDasharray={arcLength}
+                        strokeDashoffset={strokeDashoffset}
                         strokeLinecap="round"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={offset}
-                        style={{
-                            transition: 'stroke-dashoffset 1s ease-out',
-                            filter: `drop-shadow(0 0 8px ${getScoreColor()}40)`
-                        }}
+                        className="gauge-progress"
                     />
                 </svg>
 
-                <div className="score-value">
-                    <span className="score-number" style={{ color: getScoreColor() }}>
-                        {score.score}
+                {/* Center Score Text */}
+                <div className="gauge-value">
+                    <span className="current-score" style={{ color: getScoreColor() }}>
+                        {scoreVal}
                     </span>
-                    <span className="score-max">/100</span>
+                    <span className="max-score">/100</span>
                 </div>
-            </div>
-
-            <div className={`recommendation recommendation-${getRecommendationClass()}`}>
-                {getRecommendationIcon()}
-                <span>{score.recommendationText}</span>
-            </div>
-
-            <div className="metrics-summary">
-                <span>{score.availableMetrics}/{score.totalMetrics} metrics analyzed</span>
             </div>
         </div>
     );

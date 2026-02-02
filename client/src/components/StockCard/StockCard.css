@@ -1,363 +1,403 @@
+/* --- LOVABLE STOCK CARD DESIGN --- */
+
 .stock-card {
-    background: var(--gradient-card);
+    background: var(--color-bg-card);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    transition: all var(--transition-normal);
-    margin-bottom: var(--space-md);
+    transition: all 0.2s ease-in-out;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    overflow: hidden;
+    /* For rounded corners */
 }
 
 .stock-card:hover {
-    border-color: var(--color-border-light);
+    box-shadow: var(--shadow-hover);
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
 }
 
 .stock-card.expanded {
-    border-color: var(--color-accent);
-    box-shadow: var(--shadow-glow);
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+    /* Deep shadow when expanded */
+    border-color: var(--color-border-hover);
+    transform: translateY(-2px);
 }
 
 .stock-card-error {
     border-color: var(--color-danger);
+    background: #fef2f2;
 }
 
+/* --- HEADER ROW --- */
 .card-header-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: 200px 1fr 100px auto;
+    /* Structure: Info | Price | Score | Actions */
     align-items: center;
-    gap: var(--space-lg);
-    padding: var(--space-md) var(--space-lg);
+    padding: 20px 24px;
     cursor: pointer;
-    transition: background var(--transition-fast);
+    min-height: 80px;
 }
 
 .card-header-row:hover {
-    background: rgba(255, 255, 255, 0.02);
+    background: #fafafa;
 }
 
-.stock-info {
-    min-width: 180px;
+/* 1. Symbol & Name */
+.stock-info-section {
+    display: flex;
+    flex-direction: column;
 }
 
 .stock-symbol {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: var(--color-text-primary);
+    letter-spacing: -0.01em;
 }
 
 .stock-name {
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     color: var(--color-text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 200px;
+    max-width: 180px;
+    margin-top: 2px;
 }
 
-.stock-price {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    min-width: 140px;
-}
-
-.price-value {
-    font-size: 1.25rem;
-    font-weight: 600;
-}
-
-.price-change {
+/* 2. Price Section */
+.stock-price-section {
     display: flex;
     align-items: center;
-    gap: var(--space-xs);
-    font-size: 0.875rem;
-    font-weight: 500;
+    gap: 16px;
 }
 
-.holding-summary {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    min-width: 120px;
-}
-
-.holding-shares {
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
-}
-
-.holding-gain {
+.current-price {
+    font-size: 1.25rem;
     font-weight: 600;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
 }
 
-.holding-gain small {
+.price-change-badge {
+    font-size: 0.85rem;
     font-weight: 500;
-    opacity: 0.8;
-}
-
-.buffett-badge-wrapper {
-    min-width: 60px;
+    padding: 4px 8px;
+    border-radius: 6px;
     display: flex;
-    justify-content: center;
+    align-items: center;
+    gap: 4px;
 }
 
-.buffett-badge {
-    width: 48px;
-    height: 48px;
+.price-change-badge.price-up {
+    color: var(--color-success);
+    /* background: var(--color-success-bg); Remove BG for cleaner look like screenshot? Or keep it? Screenshot shows just text color usually in lists, but Lovable has badges. */
+    /* Screenshot check: The Lovable screenshot shows Green Text (+2.08) next to price. */
+    background: transparent;
+}
+
+.price-change-badge.price-down {
+    color: var(--color-danger);
+    background: transparent;
+}
+
+
+/* 3. Score Section */
+.score-section {
+    display: flex;
+    justify-content: flex-end;
+    /* Right align in its grid cell */
+    padding-right: 16px;
+}
+
+.buffett-badge-circle {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.95rem;
     border: 2px solid;
-    transition: all var(--transition-normal);
+    background: white;
 }
 
-.buffett-badge.score-excellent {
-    background: var(--color-success-bg);
+.score-excellent {
     border-color: var(--color-success);
     color: var(--color-success);
 }
 
-.buffett-badge.score-good {
-    background: rgba(34, 197, 94, 0.15);
+.score-good {
     border-color: #22c55e;
     color: #22c55e;
 }
 
-.buffett-badge.score-fair {
-    background: var(--color-warning-bg);
+.score-fair {
     border-color: var(--color-warning);
     color: var(--color-warning);
 }
 
-.buffett-badge.score-poor {
-    background: var(--color-danger-bg);
+.score-poor {
     border-color: var(--color-danger);
     color: var(--color-danger);
 }
 
-.card-actions {
+/* 4. Actions */
+.card-actions-section {
     display: flex;
-    align-items: center;
-    gap: var(--space-xs);
+    gap: 8px;
     margin-left: auto;
 }
 
-.expand-btn {
-    color: var(--color-text-muted);
-}
-
-.error-message {
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
-    color: var(--color-danger);
-    font-size: 0.875rem;
-    flex: 1;
-}
-
-/* Expanded Content */
-.card-expanded-content {
-    padding: 0 var(--space-lg) var(--space-lg);
-}
-
-.card-expanded-content .tabs {
-    margin-bottom: var(--space-lg);
-}
-
-.tab-content {
-    min-height: 300px;
-}
-
-/* Overview Grid */
-.overview-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-lg);
-}
-
-.overview-grid {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: var(--space-lg);
-}
-
-.quick-stats {
-    background: var(--color-bg-tertiary);
-    border-radius: var(--radius-md);
-    padding: var(--space-lg);
-}
-
-.quick-stats h4 {
-    margin-bottom: var(--space-md);
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    justify-content: center;
     color: var(--color-text-muted);
+    transition: all 0.2s;
 }
 
-.stats-grid {
+.action-btn:hover {
+    background: #f1f5f9;
+    color: var(--color-text-primary);
+}
+
+.expand-toggle {
+    margin-left: 8px;
+    color: var(--color-text-secondary);
+}
+
+/* --- EXPANDED CONTENT --- */
+.card-expanded-content {
+    border-top: 1px solid var(--color-border);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* TABS */
+.card-tabs {
+    display: flex;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--color-border);
+    background: #fafafa;
+    /* Slight distinctive background for tab strip */
+}
+
+.tab-btn {
+    padding: 14px 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.tab-btn:hover {
+    color: var(--color-text-primary);
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.tab-btn.active {
+    color: var(--color-accent-blue);
+    /* Royal Blue for active tab text */
+    border-bottom-color: var(--color-accent-blue);
+    font-weight: 600;
+}
+
+/* TAB PANELS */
+.tab-panel {
+    padding: 32px;
+    background: white;
+    min-height: 400px;
+}
+
+/* OVERVIEW TAB LAYOUT */
+.overview-layout {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-md);
+    grid-template-columns: 300px 1fr;
+    gap: 48px;
 }
 
-.stat-item {
+/* Left: Score Viz */
+.score-viz-panel {
     display: flex;
     flex-direction: column;
-    gap: var(--space-xs);
+    align-items: center;
+    padding: 24px;
+    /* background: #f8fafc;  User screenshot shows white clean background for gauge */
 }
 
-.stat-item .stat-label {
+.score-label-small {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-accent-blue);
+    letter-spacing: 0.05em;
+    margin-bottom: 24px;
+}
+
+.score-status-message {
+    margin-top: 24px;
+    font-size: 0.85rem;
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.score-status-message.fail {
+    background: #fef2f2;
+    color: var(--color-danger);
+}
+
+.metrics-analyzed {
+    margin-top: 12px;
     font-size: 0.75rem;
     color: var(--color-text-muted);
 }
 
-.stat-item .stat-value {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-}
-
-/* Holdings */
-.holdings-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-lg);
-}
-
-.holdings-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.holdings-header h4 {
-    font-size: 1rem;
-}
-
-.no-holdings {
-    text-align: center;
-    padding: var(--space-xl);
-    color: var(--color-text-muted);
-}
-
-.no-holdings p {
-    margin-bottom: var(--space-md);
-}
-
-.holdings-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-}
-
-.holding-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-lg);
-    padding: var(--space-md);
-    background: var(--color-bg-tertiary);
-    border-radius: var(--radius-md);
-}
-
-.holding-details {
-    display: flex;
-    gap: var(--space-md);
+/* Right: Key Stats */
+.key-stats-panel {
     flex: 1;
 }
 
-.holding-details .holding-shares {
+.section-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-accent-blue);
+    letter-spacing: 0.05em;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+}
+
+.stats-grid-clean {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-box .lbl {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.stat-box .val {
+    font-size: 1.1rem;
     font-weight: 600;
     color: var(--color-text-primary);
 }
 
-.holding-details .holding-price,
-.holding-details .holding-date {
-    color: var(--color-text-secondary);
-    font-size: 0.875rem;
-}
-
-.holding-value {
+/* --- HOLDINGS --- */
+.holdings-panel-clean {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
+    gap: 20px;
 }
 
-.current-value {
-    font-weight: 600;
-}
-
-.holding-pl {
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.holdings-total {
+.holdings-header-clean {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--space-md);
-    background: var(--color-bg-secondary);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--color-border);
-    font-weight: 600;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 16px;
 }
 
-.total-values {
+.holdings-list-clean {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
+    gap: 8px;
 }
 
-.total-value {
-    font-size: 1.125rem;
+.holding-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid transparent;
 }
 
-.total-pl {
-    font-size: 0.875rem;
+.holding-row:hover {
+    border-color: var(--color-border);
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-    .overview-grid {
+.h-info {
+    display: flex;
+    gap: 16px;
+    align-items: baseline;
+}
+
+.h-shares {
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.h-price {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+
+.btn-icon-sm {
+    color: var(--color-text-muted);
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.btn-icon-sm:hover {
+    background: #fee2e2;
+    color: var(--color-danger);
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .overview-layout {
         grid-template-columns: 1fr;
+        gap: 32px;
     }
 
-    .stats-grid {
+    .stats-grid-clean {
         grid-template-columns: repeat(2, 1fr);
     }
-}
 
-@media (max-width: 768px) {
     .card-header-row {
-        flex-wrap: wrap;
-        gap: var(--space-md);
+        grid-template-columns: 1fr auto auto;
+        gap: 12px;
     }
 
-    .stock-info {
-        order: 1;
-        flex: 1;
+    .stock-price-section {
+        justify-self: end;
     }
 
-    .card-actions {
-        order: 2;
-        margin-left: 0;
-    }
-
-    .stock-price {
-        order: 3;
-        flex: 1;
-        align-items: flex-start;
-    }
-
-    .buffett-badge-wrapper {
-        order: 4;
-    }
-
-    .holding-summary {
-        order: 5;
-        width: 100%;
-        flex-direction: row;
-        justify-content: space-between;
+    .score-section {
+        display: none;
+        /* Hide score in compact header on mobile? Or move it. */
     }
 }

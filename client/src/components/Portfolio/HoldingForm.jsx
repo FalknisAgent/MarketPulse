@@ -10,6 +10,8 @@ function HoldingForm({ symbol, existingHolding, onClose }) {
         symbol: symbol || existingHolding?.symbol || '',
         shares: existingHolding?.shares || '',
         buyPrice: existingHolding?.buyPrice || '',
+        fees: existingHolding?.fees || '0',  // NEW
+        tax: existingHolding?.tax || '0',    // NEW
         buyDate: existingHolding?.buyDate || new Date().toISOString().split('T')[0]
     });
 
@@ -22,12 +24,21 @@ function HoldingForm({ symbol, existingHolding, onClose }) {
             newErrors.symbol = 'Symbol is required';
         }
 
+        // Float validation for shares
         if (!formData.shares || parseFloat(formData.shares) <= 0) {
             newErrors.shares = 'Enter a valid number of shares';
         }
 
         if (!formData.buyPrice || parseFloat(formData.buyPrice) <= 0) {
             newErrors.buyPrice = 'Enter a valid buy price';
+        }
+
+        if (parseFloat(formData.fees) < 0) {
+            newErrors.fees = 'Fees cannot be negative';
+        }
+
+        if (parseFloat(formData.tax) < 0) {
+            newErrors.tax = 'Tax cannot be negative';
         }
 
         if (!formData.buyDate) {
@@ -47,8 +58,10 @@ function HoldingForm({ symbol, existingHolding, onClose }) {
             await actions.addHolding({
                 id: existingHolding?.id,
                 symbol: formData.symbol.toUpperCase(),
-                shares: parseFloat(formData.shares),
+                shares: parseFloat(formData.shares), // Already supports float
                 buyPrice: parseFloat(formData.buyPrice),
+                fees: parseFloat(formData.fees || 0), // NEW
+                tax: parseFloat(formData.tax || 0),   // NEW
                 buyDate: formData.buyDate
             });
             onClose();
@@ -91,15 +104,15 @@ function HoldingForm({ symbol, existingHolding, onClose }) {
 
                     <div className="form-row">
                         <div className="form-group">
-                            <label htmlFor="shares">Number of Shares</label>
+                            <label htmlFor="shares">Quantity</label>
                             <input
                                 id="shares"
                                 type="number"
-                                step="0.001"
+                                step="any" // Allows float
                                 className={`input ${errors.shares ? 'input-error' : ''}`}
                                 value={formData.shares}
                                 onChange={(e) => handleChange('shares', e.target.value)}
-                                placeholder="100"
+                                placeholder="10.5"
                             />
                             {errors.shares && <span className="error-text">{errors.shares}</span>}
                         </div>
@@ -116,6 +129,37 @@ function HoldingForm({ symbol, existingHolding, onClose }) {
                                 placeholder="150.00"
                             />
                             {errors.buyPrice && <span className="error-text">{errors.buyPrice}</span>}
+                        </div>
+                    </div>
+
+                    {/* NEW ROW FOR FEES AND TAX */}
+                    <div className="form-row">
+                        <div className="form-group">
+                            <label htmlFor="fees">Fees ($)</label>
+                            <input
+                                id="fees"
+                                type="number"
+                                step="0.01"
+                                className={`input ${errors.fees ? 'input-error' : ''}`}
+                                value={formData.fees}
+                                onChange={(e) => handleChange('fees', e.target.value)}
+                                placeholder="0.00"
+                            />
+                            {errors.fees && <span className="error-text">{errors.fees}</span>}
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="tax">Tax ($)</label>
+                            <input
+                                id="tax"
+                                type="number"
+                                step="0.01"
+                                className={`input ${errors.tax ? 'input-error' : ''}`}
+                                value={formData.tax}
+                                onChange={(e) => handleChange('tax', e.target.value)}
+                                placeholder="0.00"
+                            />
+                            {errors.tax && <span className="error-text">{errors.tax}</span>}
                         </div>
                     </div>
 
