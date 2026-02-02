@@ -69,6 +69,17 @@ NODE_ENV=development
 ALLOWED_ORIGINS=http://localhost:5173
 ```
 
+
 ## License
 
 MIT
+
+## Disclaimer
+
+**IMPORTANT: FOR INFORMATIONAL PURPOSES ONLY.**
+
+This application (MarketPulse) is provided for informational and educational purposes only. It is **NOT** financial advice, investment advice, or a recommendation to buy, sell, or hold any securities.
+
+The "Buffett Score" and other metrics are based on historical data and specific algorithms which may not be accurate or applicable to your situation. Financial data is provided by third-party sources and may be delayed or incorrect.
+
+**ALWAYS** do your own research (DYOR) and consult with a qualified financial advisor before making any investment decisions. The developers and contributors of this project assume no liability for any financial losses or damages resulting from the use of this application.

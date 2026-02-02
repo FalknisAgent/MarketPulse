@@ -2,7 +2,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
 import StockCard from './components/StockCard/StockCard';
-import './styles/index.css';
+import './index.css';
 
 function AppContent() {
   const { state } = useApp();
@@ -50,6 +50,16 @@ function AppContent() {
             </div>
           )}
         </div>
+
+        <footer className="app-footer">
+          <p className="disclaimer-text">
+            <strong>DISCLAIMER:</strong> This application is for informational and educational purposes only.
+            It does NOT constitute financial, investment, or legal advice. The "Buffett Score" and other metrics are based on historical
+            data and algorithms that may not be accurate or applicable to your specific situation.
+            Always conduct your own due diligence (DYOR) and consult with a qualified financial advisor before
+            making any investment decisions.
+          </p>
+        </footer>
       </main>
     </div>
   );

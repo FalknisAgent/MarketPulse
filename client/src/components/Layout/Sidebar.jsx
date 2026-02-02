@@ -1,6 +1,5 @@
 import { TrendingUp, List, Briefcase, RefreshCw, BarChart3 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import './Sidebar.css';
 
 function Sidebar() {
     const { state, actions } = useApp();
