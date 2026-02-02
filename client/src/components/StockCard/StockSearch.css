@@ -1,0 +1,117 @@
+.stock-search {
+    position: relative;
+    width: 100%;
+}
+
+.search-input {
+    padding-right: 80px;
+}
+
+.search-clear {
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 4px;
+    color: var(--color-text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.search-clear:hover {
+    color: var(--color-text-primary);
+    background: var(--color-bg-hover);
+}
+
+.search-spinner {
+    position: absolute;
+    right: var(--space-md);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.search-spinner .spinner {
+    width: 18px;
+    height: 18px;
+}
+
+.search-dropdown {
+    position: absolute;
+    top: calc(100% + var(--space-sm));
+    left: 0;
+    right: 0;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.search-result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--space-md);
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    text-align: left;
+}
+
+.search-result:last-child {
+    border-bottom: none;
+}
+
+.search-result:hover:not(:disabled) {
+    background: var(--color-bg-hover);
+}
+
+.search-result:disabled {
+    cursor: default;
+    opacity: 0.6;
+}
+
+.result-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.result-symbol {
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.result-name {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+
+.result-action {
+    color: var(--color-accent);
+}
+
+.result-added {
+    font-size: 0.75rem;
+    color: var(--color-success);
+    font-weight: 500;
+}
+
+.search-empty,
+.search-error {
+    padding: var(--space-lg);
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+.search-error {
+    color: var(--color-danger);
+}

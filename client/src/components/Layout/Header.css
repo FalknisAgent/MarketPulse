@@ -1,0 +1,40 @@
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: var(--space-lg);
+}
+
+.header-left {
+    flex: 0 0 auto;
+}
+
+.header-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.header-center {
+    flex: 1;
+    max-width: 500px;
+}
+
+.header-right {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.api-status-warning {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: var(--radius-md);
+}

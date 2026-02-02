@@ -1,0 +1,363 @@
+.stock-card {
+    background: var(--gradient-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-normal);
+    margin-bottom: var(--space-md);
+}
+
+.stock-card:hover {
+    border-color: var(--color-border-light);
+}
+
+.stock-card.expanded {
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-glow);
+}
+
+.stock-card-error {
+    border-color: var(--color-danger);
+}
+
+.card-header-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    padding: var(--space-md) var(--space-lg);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.card-header-row:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.stock-info {
+    min-width: 180px;
+}
+
+.stock-symbol {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.stock-name {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.stock-price {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 140px;
+}
+
+.price-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.price-change {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.holding-summary {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 120px;
+}
+
+.holding-shares {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+
+.holding-gain {
+    font-weight: 600;
+}
+
+.holding-gain small {
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+.buffett-badge-wrapper {
+    min-width: 60px;
+    display: flex;
+    justify-content: center;
+}
+
+.buffett-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    border: 2px solid;
+    transition: all var(--transition-normal);
+}
+
+.buffett-badge.score-excellent {
+    background: var(--color-success-bg);
+    border-color: var(--color-success);
+    color: var(--color-success);
+}
+
+.buffett-badge.score-good {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: #22c55e;
+    color: #22c55e;
+}
+
+.buffett-badge.score-fair {
+    background: var(--color-warning-bg);
+    border-color: var(--color-warning);
+    color: var(--color-warning);
+}
+
+.buffett-badge.score-poor {
+    background: var(--color-danger-bg);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+.card-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-left: auto;
+}
+
+.expand-btn {
+    color: var(--color-text-muted);
+}
+
+.error-message {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--color-danger);
+    font-size: 0.875rem;
+    flex: 1;
+}
+
+/* Expanded Content */
+.card-expanded-content {
+    padding: 0 var(--space-lg) var(--space-lg);
+}
+
+.card-expanded-content .tabs {
+    margin-bottom: var(--space-lg);
+}
+
+.tab-content {
+    min-height: 300px;
+}
+
+/* Overview Grid */
+.overview-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.overview-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: var(--space-lg);
+}
+
+.quick-stats {
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+}
+
+.quick-stats h4 {
+    margin-bottom: var(--space-md);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.stat-item .stat-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.stat-item .stat-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+/* Holdings */
+.holdings-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.holdings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.holdings-header h4 {
+    font-size: 1rem;
+}
+
+.no-holdings {
+    text-align: center;
+    padding: var(--space-xl);
+    color: var(--color-text-muted);
+}
+
+.no-holdings p {
+    margin-bottom: var(--space-md);
+}
+
+.holdings-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.holding-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    padding: var(--space-md);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+}
+
+.holding-details {
+    display: flex;
+    gap: var(--space-md);
+    flex: 1;
+}
+
+.holding-details .holding-shares {
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.holding-details .holding-price,
+.holding-details .holding-date {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+}
+
+.holding-value {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.current-value {
+    font-weight: 600;
+}
+
+.holding-pl {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.holdings-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-md);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    font-weight: 600;
+}
+
+.total-values {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.total-value {
+    font-size: 1.125rem;
+}
+
+.total-pl {
+    font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .overview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .card-header-row {
+        flex-wrap: wrap;
+        gap: var(--space-md);
+    }
+
+    .stock-info {
+        order: 1;
+        flex: 1;
+    }
+
+    .card-actions {
+        order: 2;
+        margin-left: 0;
+    }
+
+    .stock-price {
+        order: 3;
+        flex: 1;
+        align-items: flex-start;
+    }
+
+    .buffett-badge-wrapper {
+        order: 4;
+    }
+
+    .holding-summary {
+        order: 5;
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}

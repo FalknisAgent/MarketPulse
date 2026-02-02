@@ -1,0 +1,157 @@
+.financials-panel {
+    padding: var(--space-md) 0;
+}
+
+.financials-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+}
+
+.financial-section {
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+}
+
+.financial-section h4 {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.data-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+}
+
+.data-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.data-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.data-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.financials-loading {
+    padding: var(--space-lg);
+}
+
+/* Recommendations */
+.recommendations-chart {
+    margin-top: var(--space-md);
+}
+
+.recommendation-bar {
+    display: flex;
+    height: 32px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: var(--space-md);
+}
+
+.rec-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    transition: flex var(--transition-normal);
+}
+
+.rec-item span {
+    padding: 0 var(--space-xs);
+}
+
+.rec-strong-buy {
+    background: var(--color-success);
+}
+
+.rec-buy {
+    background: #22c55e;
+}
+
+.rec-hold {
+    background: var(--color-warning);
+}
+
+.rec-sell {
+    background: #f97316;
+}
+
+.rec-strong-sell {
+    background: var(--color-danger);
+}
+
+.recommendation-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+.legend-dot.rec-strong-buy {
+    background: var(--color-success);
+}
+
+.legend-dot.rec-buy {
+    background: #22c55e;
+}
+
+.legend-dot.rec-hold {
+    background: var(--color-warning);
+}
+
+.legend-dot.rec-sell {
+    background: #f97316;
+}
+
+.legend-dot.rec-strong-sell {
+    background: var(--color-danger);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .financials-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .data-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .data-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
