@@ -1,7 +1,7 @@
 import { Search, AlertCircle } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import StockSearch from '../StockCard/StockSearch';
-import './Header.css';
+
 
 function Header() {
     const { state } = useApp();

@@ -462,6 +462,7 @@ button {
   animation: spin 1s linear infinite;
 }
 
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -470,4 +471,51 @@ button {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* --- Header Component --- */
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--space-lg);
+  height: 100%;
+}
+
+.header-left {
+  flex: 0 0 auto;
+}
+
+.header-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.header-center {
+  flex: 1;
+  max-width: 500px;
+}
+
+.header-right {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.api-status-warning {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: #fef2f2;
+  /* Light red */
+  color: var(--color-danger);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  border: 1px solid #fee2e2;
 }
