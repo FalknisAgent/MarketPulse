@@ -26,7 +26,7 @@ function Sidebar() {
             <div className="sidebar-header">
                 <div className="logo">
                     <BarChart3 size={28} className="logo-icon" />
-                    <span className="logo-text sidebar-text">MarketPulse</span>
+                    <span className="logo-text sidebar-text">MoatWise</span>
                 </div>
             </div>
 

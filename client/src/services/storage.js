@@ -1,9 +1,9 @@
 const STORAGE_KEYS = {
-    WATCHLIST: 'marketpulse_watchlist',
-    PORTFOLIO: 'marketpulse_portfolio',
-    SETTINGS: 'marketpulse_settings',
-    CACHE: 'marketpulse_cache',
-    LAST_UPDATE: 'marketpulse_last_update'
+    WATCHLIST: 'moatwise_watchlist',
+    PORTFOLIO: 'moatwise_portfolio',
+    SETTINGS: 'moatwise_settings',
+    CACHE: 'moatwise_cache',
+    LAST_UPDATE: 'moatwise_last_update'
 };
 
 /**

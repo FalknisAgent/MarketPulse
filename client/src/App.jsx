@@ -66,7 +66,7 @@ function AppContent() {
                 <X size={16} />
               </button>
               <strong>DISCLAIMER:</strong> This application is for informational and educational purposes only.
-              It does NOT constitute financial, investment, or legal advice. The "Buffett Score" and other metrics are based on historical
+              It does NOT constitute financial, investment, or legal advice. The "Moat Score" and other metrics are based on historical
               data and algorithms that may not be accurate or applicable to your specific situation.
               Always conduct your own due diligence (DYOR) and consult with a qualified financial advisor before
               making any investment decisions.

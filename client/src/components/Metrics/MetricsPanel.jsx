@@ -5,12 +5,12 @@ import './MetricsPanel.css';
 const METRIC_INFO = {
     roe: {
         name: 'Return on Equity (ROE)',
-        description: 'Measures how efficiently a company generates profits from shareholders\' equity. Buffett prefers companies with ROE consistently above 15%.',
+        description: 'Measures how efficiently a company generates profits from shareholders\' equity. Moat principles prefer companies with ROE consistently above 15%.',
         format: 'percent'
     },
     debtToEquity: {
         name: 'Debt-to-Equity Ratio',
-        description: 'Shows the proportion of debt used to finance assets. Lower is better—Buffett prefers companies with low debt that don\'t rely heavily on borrowed money.',
+        description: 'Shows the proportion of debt used to finance assets. Lower is better—Moat principles prefer companies with low debt that don\'t rely heavily on borrowed money.',
         format: 'ratio'
     },
     profitMargin: {
@@ -25,7 +25,7 @@ const METRIC_INFO = {
     },
     epsGrowth: {
         name: 'EPS Growth (5Y CAGR)',
-        description: 'Compound annual growth rate of earnings per share. Buffett looks for consistent, predictable earnings growth over time.',
+        description: 'Compound annual growth rate of earnings per share. Moat investing looks for consistent, predictable earnings growth over time.',
         format: 'percent'
     },
     freeCashFlow: {
@@ -35,12 +35,12 @@ const METRIC_INFO = {
     },
     priceToBook: {
         name: 'Price-to-Book Ratio',
-        description: 'Stock price relative to book value per share. Lower values may indicate undervaluation—Buffett historically sought P/B below 1.5.',
+        description: 'Stock price relative to book value per share. Lower values may indicate undervaluation—value investors historically seek P/B below 1.5.',
         format: 'ratio'
     },
     intrinsicValue: {
         name: 'Intrinsic Value',
-        description: 'Estimated true value based on discounted future cash flows. Buffett buys when price is significantly below intrinsic value (margin of safety).',
+        description: 'Estimated true value based on discounted future cash flows. Value investors buy when price is significantly below intrinsic value (margin of safety).',
         format: 'currency'
     }
 };
@@ -99,8 +99,8 @@ function MetricsPanel({ metrics, score }) {
     return (
         <div className="metrics-panel">
             <div className="metrics-header">
-                <h4>Warren Buffett Investment Metrics</h4>
-                <p>Based on value investing principles from Berkshire Hathaway</p>
+                <h4>Moat Investment Metrics</h4>
+                <p>Based on value investing principles</p>
             </div>
 
             <div className="metrics-grid">

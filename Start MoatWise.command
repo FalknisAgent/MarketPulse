@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# MarketPulse Launcher
+# MoatWise Launcher
 # Double-click this file to start the app!
 
 # Get the directory where this script is located
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-echo "🚀 Starting MarketPulse..."
+echo "🚀 Starting MoatWise..."
 echo "📂 Project Directory: $DIR"
 
 # Check for Node.js

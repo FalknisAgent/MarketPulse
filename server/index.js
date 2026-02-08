@@ -84,5 +84,5 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`MarketPulse API server running on http://localhost:${PORT}`);
+  console.log(`MoatWise API server running on http://localhost:${PORT}`);
 });

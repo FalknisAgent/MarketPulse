@@ -1,12 +1,12 @@
-# MarketPulse
+# MoatWise
 
-A stock analysis application with Warren Buffett investment metrics.
+A stock analysis application with Moat investment metrics.
 
 ## Features
 
 - 📊 **Stock Watchlist** - Track your favorite stocks with real-time quotes
 - 📈 **Historical Charts** - Visualize price trends over time
-- 🎯 **Buffett Score** - Analyze stocks against Warren Buffett's investment criteria
+- 🎯 **Moat Score** - Analyze stocks against value investing criteria
 - 💼 **Portfolio Tracking** - Monitor your holdings and P/L
 - 🔒 **Secure** - CSP, CORS, rate limiting, and more
 
@@ -27,8 +27,8 @@ A stock analysis application with Warren Buffett investment metrics.
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/MarketPulse.git
-cd MarketPulse
+git clone https://github.com/YOUR_USERNAME/MoatWise.git
+cd MoatWise
 
 # Install backend dependencies
 cd server
@@ -78,8 +78,8 @@ MIT
 
 **IMPORTANT: FOR INFORMATIONAL PURPOSES ONLY.**
 
-This application (MarketPulse) is provided for informational and educational purposes only. It is **NOT** financial advice, investment advice, or a recommendation to buy, sell, or hold any securities.
+This application (MoatWise) is provided for informational and educational purposes only. It is **NOT** financial advice, investment advice, or a recommendation to buy, sell, or hold any securities.
 
-The "Buffett Score" and other metrics are based on historical data and specific algorithms which may not be accurate or applicable to your situation. Financial data is provided by third-party sources and may be delayed or incorrect.
+The "Moat Score" and other metrics are based on historical data and specific algorithms which may not be accurate or applicable to your situation. Financial data is provided by third-party sources and may be delayed or incorrect.
 
 **ALWAYS** do your own research (DYOR) and consult with a qualified financial advisor before making any investment decisions. The developers and contributors of this project assume no liability for any financial losses or damages resulting from the use of this application.

@@ -153,7 +153,7 @@ function StockCard({ symbol, showHoldings = false }) {
                 <div className="card-expanded-content">
                     {/* Tabs Navigation */}
                     <div className="card-tabs">
-                        {['overview', 'financials', 'buffett metrics', 'chart'].map((tab) => (
+                        {['overview', 'financials', 'moat metrics', 'chart'].map((tab) => (
                             <button
                                 key={tab}
                                 className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
@@ -179,7 +179,7 @@ function StockCard({ symbol, showHoldings = false }) {
                             <div className="overview-layout">
                                 {/* Left: Score Visualization */}
                                 <div className="score-viz-panel">
-                                    <div className="score-label-small">BUFFETT SCORE</div>
+                                    <div className="score-label-small">MOAT SCORE</div>
                                     <BuffettScore score={buffettScore} />
                                     {buffettScore?.score < 40 && (
                                         <div className="score-status-message fail">
@@ -232,7 +232,7 @@ function StockCard({ symbol, showHoldings = false }) {
 
                         {activeTab === 'financials' && <FinancialsPanel financials={stockData?.financials} />}
 
-                        {activeTab === 'buffett metrics' && (
+                        {activeTab === 'moat metrics' && (
                             <MetricsPanel metrics={buffettScore?.metrics} score={buffettScore} />
                         )}
 
