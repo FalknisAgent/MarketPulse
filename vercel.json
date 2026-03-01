@@ -3,17 +3,10 @@
     "buildCommand": "cd api && npm install && cd ../client && npm install && npm run build",
     "outputDirectory": "client/dist",
     "framework": null,
-    "routes": [
+    "rewrites": [
         {
-            "src": "/api/(.*)",
-            "dest": "/api/$1"
-        },
-        {
-            "handle": "filesystem"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/index.html"
+            "source": "/((?!api/).*)",
+            "destination": "/index.html"
         }
     ]
 }
