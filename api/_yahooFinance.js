@@ -8,6 +8,10 @@ const yahooFinance = new YahooFinance({
     }
 });
 
+// Options passed to every yahoo-finance2 call to skip schema validation
+// (non-US stocks like SIKA.SW return extra/unexpected fields that fail validation)
+const NO_VALIDATE = { validateResult: false };
+
 const isValidSymbol = (symbol) => {
     return /^[A-Z0-9.-]{1,10}$/.test(symbol.toUpperCase());
 };
@@ -19,7 +23,7 @@ const sanitizeSymbol = (symbol) => {
 async function getQuote(symbol) {
     const sanitized = sanitizeSymbol(symbol);
     if (!isValidSymbol(sanitized)) throw new Error('Invalid symbol format');
-    const quote = await yahooFinance.quote(sanitized);
+    const quote = await yahooFinance.quote(sanitized, {}, NO_VALIDATE);
     return {
         symbol: quote.symbol,
         shortName: quote.shortName || quote.longName,
@@ -70,7 +74,7 @@ async function getHistoricalData(symbol, period = 'max') {
         period1: dateRange.period1,
         period2: dateRange.period2,
         interval: period === '1m' ? '1d' : '1wk'
-    });
+    }, NO_VALIDATE);
     return {
         symbol: sanitized,
         quotes: result.quotes.map(q => ({
@@ -92,7 +96,7 @@ async function getFinancials(symbol) {
         'earnings', 'earningsHistory', 'earningsTrend', 'recommendationTrend'
     ];
     const results = await Promise.all(allModules.map(module =>
-        yahooFinance.quoteSummary(sanitized, { modules: [module] })
+        yahooFinance.quoteSummary(sanitized, { modules: [module] }, NO_VALIDATE)
             .catch(() => null)
     ));
     const fullSummary = {};
@@ -102,7 +106,7 @@ async function getFinancials(symbol) {
         period1: (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 10); return d; })(),
         period2: new Date(),
         module: 'all'
-    }).catch(() => null);
+    }, NO_VALIDATE).catch(() => null);
 
     return {
         symbol: sanitized,
@@ -124,7 +128,7 @@ async function getFinancials(symbol) {
 
 async function searchStocks(query) {
     const sanitizedQuery = query.replace(/[<>"'&]/g, '').slice(0, 50);
-    const results = await yahooFinance.search(sanitizedQuery, { quotesCount: 10, newsCount: 0 });
+    const results = await yahooFinance.search(sanitizedQuery, { quotesCount: 10, newsCount: 0 }, NO_VALIDATE);
     return results.quotes
         .filter(q => q.quoteType === 'EQUITY')
         .map(q => ({
