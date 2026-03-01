@@ -1,5 +1,6 @@
-// Environment-based API URL (set VITE_API_URL in .env for production)
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// On Vercel, frontend and API share the same domain → use relative /api path
+// For local Express dev, override with: VITE_API_URL=http://localhost:3001/api
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 const REQUEST_TIMEOUT_MS = 30000; // 30 seconds
 const MAX_RETRIES = 2;
 
@@ -101,7 +102,7 @@ export async function getFullStockData(symbol) {
  */
 export async function checkHealth() {
     try {
-        const response = await fetch('http://localhost:3001/health');
+        const response = await fetch(`${API_BASE.replace(/\/api$/, '')}/api/health`);
         return response.ok;
     } catch {
         return false;

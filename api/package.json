@@ -1,0 +1,8 @@
+{
+    "name": "moatwise-api",
+    "version": "1.0.0",
+    "type": "commonjs",
+    "dependencies": {
+        "yahoo-finance2": "^3.13.0"
+    }
+}

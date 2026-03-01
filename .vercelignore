@@ -1,0 +1,3 @@
+# Vercel ignores node_modules automatically, but exclude old server folder
+# from being bundled as part of the Vercel project
+server/node_modules
