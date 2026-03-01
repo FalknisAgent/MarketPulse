@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
+import { Analytics } from '@vercel/analytics/react';
 import { AppProvider, useApp } from './context/AppContext';
 import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
@@ -82,6 +83,7 @@ function App() {
   return (
     <AppProvider>
       <AppContent />
+      <Analytics />
     </AppProvider>
   );
 }
