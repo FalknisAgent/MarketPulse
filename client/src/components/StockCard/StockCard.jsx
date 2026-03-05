@@ -207,7 +207,7 @@ function StockCard({ symbol, showHoldings = false }) {
                                         </div>
                                         <div className="stat-box">
                                             <div className="lbl">DIVIDEND YIELD</div>
-                                            <div className="val">{quote?.dividendYield ? formatPercent(quote.dividendYield * 100) : '-'}</div>
+                                            <div className="val">{quote?.dividendYield ? formatPercent(quote.dividendYield) : '-'}</div>
                                         </div>
                                         <div className="stat-box">
                                             <div className="lbl">52W HIGH</div>
