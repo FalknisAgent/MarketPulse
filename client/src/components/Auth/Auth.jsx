@@ -52,6 +52,27 @@ const Auth = () => {
         setMessage({ type: 'info', text: `${provider} authentication is coming soon.` });
     };
 
+    const handleResetPassword = async () => {
+        if (!email) {
+            setMessage({ type: 'error', text: 'Please enter your email address above to reset your password.' });
+            return;
+        }
+        setLoading(true);
+        setMessage({ type: '', text: '' });
+        
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin + '/auth?type=recovery',
+            });
+            if (error) throw error;
+            setMessage({ type: 'success', text: 'Password reset link sent to your email!' });
+        } catch (error) {
+            setMessage({ type: 'error', text: error.message || error.error_description });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="auth-wrapper">
             <div className="auth-container">
@@ -161,7 +182,16 @@ const Auth = () => {
                         <div className="form-group">
                             <div className="label-row">
                                 <label htmlFor="password">Password</label>
-                                {isLogin && <button type="button" className="forgot-link">Forgot password?</button>}
+                                {isLogin && (
+                                    <button 
+                                        type="button" 
+                                        className="forgot-link" 
+                                        onClick={handleResetPassword}
+                                        disabled={loading}
+                                    >
+                                        Forgot password?
+                                    </button>
+                                )}
                             </div>
                             <input 
                                 id="password" 
