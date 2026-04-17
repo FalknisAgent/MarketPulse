@@ -17,6 +17,14 @@ function StockCard({ symbol, showHoldings = false }) {
     const [activeTab, setActiveTab] = useState('overview');
     const [showAddHolding, setShowAddHolding] = useState(false);
 
+    // Currency helpers
+    const selectedCurrency = state.selectedCurrency;
+    const fmt = (price, fromCurrency) => {
+        const converted = actions.convertPrice(price, fromCurrency || quote?.currency || 'USD');
+        const sym = actions.getCurrencySymbol(selectedCurrency);
+        return converted != null ? `${sym}${converted.toFixed(2)}` : '-';
+    };
+
     // Defensive check for stockData
     const stockData = state.stockData?.[symbol];
     const isExpanded = state.expandedStock === symbol;
@@ -115,9 +123,12 @@ function StockCard({ symbol, showHoldings = false }) {
                         <div className="skeleton" style={{ width: 100, height: 24 }}></div>
                     ) : quote?.price ? (
                         <>
-                            <span className="current-price">${quote.price.toFixed(2)}</span>
+                            <span className="current-price">{fmt(quote.price, quote.currency)}</span>
+                            {quote.currency && quote.currency !== selectedCurrency && (
+                                <span className="native-currency-badge">{quote.currency}</span>
+                            )}
                             <span className={`price-change-badge ${getPriceChangeClass()}`}>
-                                {quote.change >= 0 ? '+' : ''}{quote.change?.toFixed(2)} ({quote.changePercent?.toFixed(2)}%)
+                                {quote.change >= 0 ? '+' : ''}{fmt(quote.change, quote.currency)} ({quote.changePercent?.toFixed(2)}%)
                             </span>
                         </>
                     ) : (
@@ -195,7 +206,7 @@ function StockCard({ symbol, showHoldings = false }) {
                                     <div className="stats-grid-clean">
                                         <div className="stat-box">
                                             <div className="lbl">MARKET CAP</div>
-                                            <div className="val">{formatCurrency(quote?.marketCap)}</div>
+                                            <div className="val">{formatCurrency(actions.convertPrice(quote?.marketCap, quote?.currency))}</div>
                                         </div>
                                         <div className="stat-box">
                                             <div className="lbl">P/E RATIO</div>
@@ -203,7 +214,7 @@ function StockCard({ symbol, showHoldings = false }) {
                                         </div>
                                         <div className="stat-box">
                                             <div className="lbl">EPS</div>
-                                            <div className="val">${quote?.eps?.toFixed(2) || '-'}</div>
+                                            <div className="val">{fmt(quote?.eps, quote?.currency)}</div>
                                         </div>
                                         <div className="stat-box">
                                             <div className="lbl">DIVIDEND YIELD</div>
@@ -211,11 +222,11 @@ function StockCard({ symbol, showHoldings = false }) {
                                         </div>
                                         <div className="stat-box">
                                             <div className="lbl">52W HIGH</div>
-                                            <div className="val">${quote?.fiftyTwoWeekHigh?.toFixed(2) || '-'}</div>
+                                            <div className="val">{fmt(quote?.fiftyTwoWeekHigh, quote?.currency)}</div>
                                         </div>
                                         <div className="stat-box">
                                             <div className="lbl">52W LOW</div>
-                                            <div className="val">${quote?.fiftyTwoWeekLow?.toFixed(2) || '-'}</div>
+                                            <div className="val">{fmt(quote?.fiftyTwoWeekLow, quote?.currency)}</div>
                                         </div>
                                         <div className="stat-box">
                                             <div className="lbl">VOLUME</div>

@@ -10,6 +10,7 @@
         }
     },
     "rewrites": [
+        { "source": "/api/fx/:pair", "destination": "/api/fx/[pair].js" },
         { "source": "/api/search", "destination": "/api/search.js" },
         { "source": "/api/health", "destination": "/api/health.js" },
         { "source": "/api/full/:symbol", "destination": "/api/full/[symbol].js" },

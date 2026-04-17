@@ -244,6 +244,75 @@ header.header {
   flex: 0 1 480px;
 }
 
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* Currency Selector */
+.currency-selector-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.currency-selector {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 6px 28px 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: border-color 0.2s;
+  font-family: var(--font-family);
+}
+
+.currency-selector:hover {
+  border-color: var(--color-border-hover);
+}
+
+.currency-selector:focus {
+  outline: none;
+  border-color: var(--color-accent-blue);
+  box-shadow: 0 0 0 2px rgba(15, 98, 254, 0.1);
+}
+
+.currency-chevron {
+  position: absolute;
+  right: 8px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+/* Native currency badge shown when stock currency ≠ display currency */
+.native-currency-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: var(--color-bg-hover);
+  color: var(--color-text-muted);
+  margin-left: 4px;
+  vertical-align: middle;
+  letter-spacing: 0.5px;
+}
+
+.api-status-warning {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--color-danger);
+  font-weight: 500;
+}
+
 /* Search Bar - Clean & White */
 .search-container input {
   width: 100%;

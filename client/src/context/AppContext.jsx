@@ -1,9 +1,10 @@
-import { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
 import * as storage from '../services/storage';
 import * as api from '../services/api';
 import { calculateBuffettScore } from '../utils/buffettMetrics';
 import { supabase } from '../services/supabase';
 import { cloudStorage } from '../services/cloudStorage';
+import { fetchRate, convertPrice as fxConvert, getCurrencySymbol } from '../services/fx';
 
 // Initial state
 const initialState = {
@@ -24,7 +25,11 @@ const initialState = {
     isLoading: false,
     lastUpdate: null,
     apiHealthy: true,
-    error: null
+    error: null,
+
+    // Currency
+    selectedCurrency: 'USD',
+    fxRates: { USD: 1 }, // rates: 1 unit of currency → USD
 };
 
 // Action types
@@ -47,7 +52,9 @@ const ACTIONS = {
     SET_LAST_UPDATE: 'SET_LAST_UPDATE',
     SET_API_HEALTH: 'SET_API_HEALTH',
     SET_ERROR: 'SET_ERROR',
-    CLEAR_ERROR: 'CLEAR_ERROR'
+    CLEAR_ERROR: 'CLEAR_ERROR',
+    SET_CURRENCY: 'SET_CURRENCY',
+    SET_FX_RATES: 'SET_FX_RATES'
 };
 
 // Reducer
@@ -159,6 +166,12 @@ function appReducer(state, action) {
 
         case ACTIONS.CLEAR_ERROR:
             return { ...state, error: null };
+
+        case ACTIONS.SET_CURRENCY:
+            return { ...state, selectedCurrency: action.payload };
+
+        case ACTIONS.SET_FX_RATES:
+            return { ...state, fxRates: { ...state.fxRates, ...action.payload } };
 
         default:
             return state;
@@ -382,7 +395,41 @@ export function AppProvider({ children }) {
         fetchStockData,
         refreshAllStocks,
 
-        clearError: () => dispatch({ type: ACTIONS.CLEAR_ERROR })
+        clearError: () => dispatch({ type: ACTIONS.CLEAR_ERROR }),
+
+        // Currency actions
+        setCurrency: async (currency) => {
+            dispatch({ type: ACTIONS.SET_CURRENCY, payload: currency });
+            // Fetch rate from USD → currency and also currency → USD for the conversion map
+            // We store rates as: how many units of `currency` per 1 USD
+            if (currency !== 'USD') {
+                const rate = await fetchRate('USD', currency);
+                dispatch({ type: ACTIONS.SET_FX_RATES, payload: { [currency]: rate } });
+            }
+        },
+
+        // Convert a price from its native currency to the selected display currency
+        convertPrice: (price, fromCurrency) => {
+            if (!price) return price;
+            // fxRates stores: "USD → currency" rates  e.g. { EUR: 0.92, CHF: 0.89 }
+            // So to convert: price (in fromCurrency) → USD → selectedCurrency
+            // Step 1: fromCurrency → USD using inverse of USD→fromCurrency rate
+            // Step 2: USD → selectedCurrency using USD→selectedCurrency rate
+            const from = (fromCurrency || 'USD').toUpperCase();
+            const to = state.selectedCurrency.toUpperCase();
+            if (from === to) return price;
+
+            const fromRateUSD = state.fxRates[from] ?? null; // USD→from rate
+            const toRateUSD = state.fxRates[to] ?? null;     // USD→to rate
+
+            // If we don't have the rates yet, return unconverted
+            if (!fromRateUSD || !toRateUSD) return price;
+
+            const priceInUSD = price / fromRateUSD;
+            return priceInUSD * toRateUSD;
+        },
+
+        getCurrencySymbol: (currency) => getCurrencySymbol(currency ?? state.selectedCurrency)
     };
 
     return (
