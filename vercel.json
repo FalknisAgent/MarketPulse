@@ -3,10 +3,19 @@
     "buildCommand": "cd api && npm install && cd ../client && npm install && npm run build",
     "outputDirectory": "client/dist",
     "framework": null,
-    "rewrites": [
-        {
-            "source": "/((?!api/).*)",
-            "destination": "/index.html"
+    "functions": {
+        "api/**/*.js": {
+            "memory": 1024,
+            "maxDuration": 30
         }
+    },
+    "rewrites": [
+        { "source": "/api/search", "destination": "/api/search.js" },
+        { "source": "/api/health", "destination": "/api/health.js" },
+        { "source": "/api/full/:symbol", "destination": "/api/full/[symbol].js" },
+        { "source": "/api/quote/:symbol", "destination": "/api/quote/[symbol].js" },
+        { "source": "/api/financials/:symbol", "destination": "/api/financials/[symbol].js" },
+        { "source": "/api/historical/:symbol", "destination": "/api/historical/[symbol].js" },
+        { "source": "/((?!api/).*)", "destination": "/index.html" }
     ]
 }
