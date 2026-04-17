@@ -212,6 +212,15 @@
     gap: var(--spacing-md);
 }
 
+.form-row {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
 .form-group {
     display: flex;
     flex-direction: column;

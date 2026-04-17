@@ -257,6 +257,20 @@ export function AppProvider({ children }) {
             }
         }
 
+        // Enforce Local Guest Limit
+        if (!state.user) {
+            let checkedStocks = JSON.parse(localStorage.getItem('moatwise_guest_checked') || '[]');
+            if (!checkedStocks.includes(upperSymbol)) {
+                if (checkedStocks.length >= 3) {
+                    const msg = "You've exhausted your 3 free stock checks. Create an account to unlock unlimited access!";
+                    dispatch({ type: ACTIONS.SET_PAYWALL, payload: msg });
+                    return null;
+                }
+                checkedStocks.push(upperSymbol);
+                localStorage.setItem('moatwise_guest_checked', JSON.stringify(checkedStocks));
+            }
+        }
+
         dispatch({ type: ACTIONS.SET_STOCK_LOADING, payload: upperSymbol });
 
         try {

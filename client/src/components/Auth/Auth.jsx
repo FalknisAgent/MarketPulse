@@ -9,6 +9,8 @@ const Auth = () => {
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [message, setMessage] = useState({ type: '', text: '' });
     const [isLogin, setIsLogin] = useState(true);
 
@@ -23,7 +25,16 @@ const Auth = () => {
                 const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
                 error = signInError;
             } else {
-                const { error: signUpError } = await supabase.auth.signUp({ email, password });
+                const { error: signUpError } = await supabase.auth.signUp({ 
+                    email, 
+                    password,
+                    options: {
+                        data: {
+                            first_name: firstName,
+                            last_name: lastName
+                        }
+                    }
+                });
                 error = signUpError;
                 if (!error) setMessage({ type: 'success', text: 'Check your email for the confirmation link!' });
             }
@@ -110,6 +121,32 @@ const Auth = () => {
                     )}
 
                     <form onSubmit={handleAuth} className="auth-form">
+                        {!isLogin && (
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label htmlFor="firstName">First name</label>
+                                    <input 
+                                        id="firstName" 
+                                        type="text" 
+                                        value={firstName} 
+                                        onChange={(e) => setFirstName(e.target.value)} 
+                                        placeholder="John" 
+                                        required={!isLogin} 
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="lastName">Last name</label>
+                                    <input 
+                                        id="lastName" 
+                                        type="text" 
+                                        value={lastName} 
+                                        onChange={(e) => setLastName(e.target.value)} 
+                                        placeholder="Doe" 
+                                        required={!isLogin} 
+                                    />
+                                </div>
+                            </div>
+                        )}
                         <div className="form-group">
                             <label htmlFor="email">Email address</label>
                             <input 
