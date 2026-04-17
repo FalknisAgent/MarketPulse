@@ -57,7 +57,7 @@ function appReducer(state, action) {
             return { ...state, activeView: action.payload, expandedStock: null, paywallMessage: null };
             
         case ACTIONS.SET_PAYWALL:
-            return { ...state, activeView: 'auth', expandedStock: null, paywallMessage: action.payload };
+            return { ...state, paywallMessage: action.payload };
 
         case ACTIONS.SET_EXPANDED:
             return { ...state, expandedStock: action.payload };

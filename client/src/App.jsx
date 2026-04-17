@@ -8,7 +8,7 @@ import Auth from './components/Auth/Auth';
 import './index.css';
 
 function AppContent() {
-  const { state } = useApp();
+  const { state, actions } = useApp();
   const { activeView, watchlist, portfolio } = state;
   const [showDisclaimer, setShowDisclaimer] = useState(true);
 
@@ -28,7 +28,44 @@ function AppContent() {
         <Header />
 
         <div className="content-area">
+          {/* Paywall Banner — shown when guest has hit the 3-stock limit */}
+          {state.paywallMessage && !state.user && activeView !== 'auth' && (
+            <div style={{
+              background: 'rgba(245,158,11,0.1)',
+              border: '1px solid rgba(245,158,11,0.4)',
+              borderRadius: '10px',
+              padding: '12px 20px',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px',
+              fontSize: '0.875rem',
+              color: '#d97706',
+              fontWeight: 500,
+            }}>
+              <span>⚠️ {state.paywallMessage}</span>
+              <button
+                onClick={() => actions.setView('auth')}
+                style={{
+                  background: '#d97706',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '6px 14px',
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Sign Up Free →
+              </button>
+            </div>
+          )}
           {activeView === 'auth' ? (
+              <Auth />
+          ) : activeView === 'portfolio' && !state.user ? (
               <Auth />
           ) : symbolsToShow.length === 0 ? (
             <div className="empty-state">
