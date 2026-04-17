@@ -15,9 +15,15 @@ const Auth = () => {
     const [isLogin, setIsLogin] = useState(true);
 
     const handleAuth = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         setLoading(true);
         setMessage({ type: '', text: '' });
+
+        if (!supabase) {
+            setMessage({ type: 'error', text: 'Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.' });
+            setLoading(false);
+            return;
+        }
 
         try {
             let error;
@@ -53,10 +59,16 @@ const Auth = () => {
     };
 
     const handleResetPassword = async () => {
+        if (!supabase) {
+            setMessage({ type: 'error', text: 'Supabase is not configured. Please set environment variables.' });
+            return;
+        }
+
         if (!email) {
             setMessage({ type: 'error', text: 'Please enter your email address above to reset your password.' });
             return;
         }
+
         setLoading(true);
         setMessage({ type: '', text: '' });
         
