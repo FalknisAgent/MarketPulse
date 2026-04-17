@@ -8,6 +8,9 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const isDev = process.env.NODE_ENV !== 'production';
 
+// Critical for Production: Ensures req.ip returns the real user's IP instead of the Load Balancer's IP
+app.set('trust proxy', 1);
+
 // Allowed origins for CORS
 const allowedOrigins = isDev
   ? ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173']

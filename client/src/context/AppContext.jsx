@@ -2,12 +2,18 @@ import { createContext, useContext, useReducer, useEffect, useCallback } from 'r
 import * as storage from '../services/storage';
 import * as api from '../services/api';
 import { calculateBuffettScore } from '../utils/buffettMetrics';
+import { supabase } from '../services/supabase';
+import { cloudStorage } from '../services/cloudStorage';
 
 // Initial state
 const initialState = {
     // View state
-    activeView: 'watchlist', // 'watchlist' | 'portfolio'
+    activeView: 'watchlist', // 'watchlist' | 'portfolio' | 'auth'
     expandedStock: null,
+    paywallMessage: null,
+    
+    user: null,
+    session: null,
 
     // Data
     watchlist: [],
@@ -24,7 +30,9 @@ const initialState = {
 // Action types
 const ACTIONS = {
     SET_VIEW: 'SET_VIEW',
+    SET_PAYWALL: 'SET_PAYWALL',
     SET_EXPANDED: 'SET_EXPANDED',
+    SET_AUTH: 'SET_AUTH',
     SET_WATCHLIST: 'SET_WATCHLIST',
     ADD_TO_WATCHLIST: 'ADD_TO_WATCHLIST',
     REMOVE_FROM_WATCHLIST: 'REMOVE_FROM_WATCHLIST',
@@ -46,10 +54,16 @@ const ACTIONS = {
 function appReducer(state, action) {
     switch (action.type) {
         case ACTIONS.SET_VIEW:
-            return { ...state, activeView: action.payload };
+            return { ...state, activeView: action.payload, expandedStock: null, paywallMessage: null };
+            
+        case ACTIONS.SET_PAYWALL:
+            return { ...state, activeView: 'auth', expandedStock: null, paywallMessage: action.payload };
 
         case ACTIONS.SET_EXPANDED:
             return { ...state, expandedStock: action.payload };
+
+        case ACTIONS.SET_AUTH:
+            return { ...state, user: action.payload.user, session: action.payload.session };
 
         case ACTIONS.SET_WATCHLIST:
             return { ...state, watchlist: action.payload };
@@ -174,17 +188,57 @@ export function AppProvider({ children }) {
         api.checkHealth().then(healthy => {
             dispatch({ type: ACTIONS.SET_API_HEALTH, payload: healthy });
         });
+
+        if (supabase) {
+            supabase.auth.getSession().then(({ data: { session } }) => {
+                dispatch({ type: ACTIONS.SET_AUTH, payload: { session, user: session?.user || null } });
+            });
+            const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+                dispatch({ type: ACTIONS.SET_AUTH, payload: { session, user: session?.user || null } });
+            });
+            return () => subscription.unsubscribe();
+        }
     }, []);
 
-    // Persist watchlist changes
     useEffect(() => {
-        storage.saveWatchlist(state.watchlist);
-    }, [state.watchlist]);
+        if (state.user) {
+            const loadCloudData = async () => {
+                const cloudWatchlist = await cloudStorage.getWatchlist(state.user.id);
+                const cloudPortfolio = await cloudStorage.getPortfolio(state.user.id);
+                
+                const localWatchlist = storage.getWatchlist();
+                const localPortfolio = storage.getPortfolio();
+                
+                if (cloudWatchlist.length === 0 && localWatchlist.length > 0) {
+                     await cloudStorage.saveWatchlist(state.user.id, localWatchlist);
+                     dispatch({ type: ACTIONS.SET_WATCHLIST, payload: localWatchlist });
+                } else {
+                     dispatch({ type: ACTIONS.SET_WATCHLIST, payload: cloudWatchlist });
+                }
+                
+                if (cloudPortfolio.length === 0 && localPortfolio.length > 0) {
+                     await cloudStorage.savePortfolio(state.user.id, localPortfolio);
+                     dispatch({ type: ACTIONS.SET_PORTFOLIO, payload: localPortfolio });
+                } else {
+                     dispatch({ type: ACTIONS.SET_PORTFOLIO, payload: cloudPortfolio });
+                }
+            };
+            loadCloudData();
+        } else {
+             dispatch({ type: ACTIONS.SET_WATCHLIST, payload: storage.getWatchlist() });
+             dispatch({ type: ACTIONS.SET_PORTFOLIO, payload: storage.getPortfolio() });
+        }
+    }, [state.user]);
 
-    // Persist portfolio changes
     useEffect(() => {
-        storage.savePortfolio(state.portfolio);
-    }, [state.portfolio]);
+        if (state.user) { cloudStorage.saveWatchlist(state.user.id, state.watchlist); } 
+        else { storage.saveWatchlist(state.watchlist); }
+    }, [state.watchlist, state.user]);
+
+    useEffect(() => {
+        if (state.user) { cloudStorage.savePortfolio(state.user.id, state.portfolio); } 
+        else { storage.savePortfolio(state.portfolio); }
+    }, [state.portfolio, state.user]);
 
     // Fetch stock data
     const fetchStockData = useCallback(async (symbol, forceRefresh = false) => {
@@ -226,13 +280,17 @@ export function AppProvider({ children }) {
 
             return stockData;
         } catch (error) {
-            dispatch({
-                type: ACTIONS.SET_STOCK_ERROR,
-                payload: { symbol: upperSymbol, error: error.message }
-            });
+            if (error.isPaywall) {
+                dispatch({ type: ACTIONS.SET_PAYWALL, payload: error.message });
+            } else {
+                dispatch({
+                    type: ACTIONS.SET_STOCK_ERROR,
+                    payload: { symbol: upperSymbol, error: error.message }
+                });
+            }
             throw error;
         }
-    }, []);
+    }, [dispatch]);
 
     // Refresh all stocks
     const refreshAllStocks = useCallback(async () => {
@@ -262,11 +320,10 @@ export function AppProvider({ children }) {
 
         addToWatchlist: async (symbol) => {
             const upperSymbol = symbol.toUpperCase();
-            dispatch({ type: ACTIONS.ADD_TO_WATCHLIST, payload: upperSymbol });
             try {
                 await fetchStockData(upperSymbol);
+                dispatch({ type: ACTIONS.ADD_TO_WATCHLIST, payload: upperSymbol });
             } catch (error) {
-                // Error already handled by fetchStockData which sets error state
                 console.error('Failed to fetch stock data:', error.message);
             }
         },
@@ -281,20 +338,22 @@ export function AppProvider({ children }) {
                 id: holding.id || Date.now().toString(),
                 symbol: holding.symbol.toUpperCase()
             };
-            dispatch({ type: ACTIONS.ADD_HOLDING, payload: newHolding });
 
-            // Also add to watchlist if not there
-            if (!state.watchlist.includes(newHolding.symbol)) {
-                dispatch({ type: ACTIONS.ADD_TO_WATCHLIST, payload: newHolding.symbol });
-            }
-
-            // Fetch stock data if needed
+            // Fetch stock data first to validate limit
             if (!state.stockData?.[newHolding.symbol]) {
                 try {
                     await fetchStockData(newHolding.symbol);
                 } catch (error) {
                     console.error('Failed to fetch stock data:', error.message);
+                    return; // abort adding holding
                 }
+            }
+
+            dispatch({ type: ACTIONS.ADD_HOLDING, payload: newHolding });
+
+            // Also add to watchlist if not there
+            if (!state.watchlist.includes(newHolding.symbol)) {
+                dispatch({ type: ACTIONS.ADD_TO_WATCHLIST, payload: newHolding.symbol });
             }
         },
 

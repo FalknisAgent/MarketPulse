@@ -2,6 +2,46 @@ const express = require('express');
 const router = express.Router();
 const yahooFinance = require('../services/yahooFinance');
 
+// Central Memory Store: IP Address -> Set of Symbols
+const guestLookups = new Map();
+const MAX_FREE_STOCKS = 3;
+
+/**
+ * Middleware: Check if guest IP has exceeded 3 unique stocks
+ */
+const guestLimitCheck = (req, res, next) => {
+    // If a valid Authorization header is provided, skip the limit (assuming they are authenticated)
+    if (req.headers.authorization) {
+        return next();
+    }
+
+    // Identify standard request parameters that contain symbols
+    const symbol = req.params.symbol || req.query.q;
+    if (!symbol) return next();
+
+    const cleanSymbol = symbol.toUpperCase().trim();
+    const clientIp = req.ip || req.connection.remoteAddress;
+
+    // Initialize tracking for this IP
+    if (!guestLookups.has(clientIp)) {
+        guestLookups.set(clientIp, new Set());
+    }
+
+    const userSet = guestLookups.get(clientIp);
+
+    // If they already hit the limit and are trying a NEW symbol, block it.
+    if (userSet.size >= MAX_FREE_STOCKS && !userSet.has(cleanSymbol)) {
+        return res.status(403).json({
+            error: 'GUEST_LIMIT_REACHED',
+            message: 'You have exhausted your 3 free stock checks.'
+        });
+    }
+
+    // Only add if we haven't blocked it
+    userSet.add(cleanSymbol);
+    next();
+};
+
 /**
  * GET /api/search?q=query
  * Search for stocks by name or symbol
@@ -26,7 +66,7 @@ router.get('/search', async (req, res) => {
  * GET /api/quote/:symbol
  * Get current quote for a stock
  */
-router.get('/quote/:symbol', async (req, res) => {
+router.get('/quote/:symbol', guestLimitCheck, async (req, res) => {
     try {
         const { symbol } = req.params;
 
@@ -49,7 +89,7 @@ router.get('/quote/:symbol', async (req, res) => {
  * GET /api/historical/:symbol?period=1y
  * Get historical price data
  */
-router.get('/historical/:symbol', async (req, res) => {
+router.get('/historical/:symbol', guestLimitCheck, async (req, res) => {
     try {
         const { symbol } = req.params;
         const period = req.query.period || 'max';
@@ -78,7 +118,7 @@ router.get('/historical/:symbol', async (req, res) => {
  * GET /api/financials/:symbol
  * Get financial statements and metrics
  */
-router.get('/financials/:symbol', async (req, res) => {
+router.get('/financials/:symbol', guestLimitCheck, async (req, res) => {
     try {
         const { symbol } = req.params;
 
@@ -101,7 +141,7 @@ router.get('/financials/:symbol', async (req, res) => {
  * GET /api/full/:symbol
  * Get all data for a stock (quote + financials + historical)
  */
-router.get('/full/:symbol', async (req, res) => {
+router.get('/full/:symbol', guestLimitCheck, async (req, res) => {
     try {
         const { symbol } = req.params;
 

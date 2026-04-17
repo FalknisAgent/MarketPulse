@@ -1,4 +1,4 @@
-import { TrendingUp, List, Briefcase, RefreshCw, BarChart3 } from 'lucide-react';
+import { TrendingUp, List, Briefcase, RefreshCw, BarChart3, User } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 function Sidebar() {
@@ -47,6 +47,14 @@ function Sidebar() {
                     <Briefcase size={20} />
                     <span className="sidebar-text">Portfolio</span>
                     <span className="nav-badge sidebar-text">{portfolio.length}</span>
+                </button>
+
+                <button
+                    className={`nav-item ${activeView === 'auth' ? 'active' : ''}`}
+                    onClick={() => actions.setView('auth')}
+                >
+                    <User size={20} />
+                    <span className="sidebar-text">{state.user ? 'My Account' : 'Sign In'}</span>
                 </button>
             </nav>
 

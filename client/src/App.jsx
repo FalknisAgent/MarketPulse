@@ -4,6 +4,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
 import StockCard from './components/StockCard/StockCard';
+import Auth from './components/Auth/Auth';
 import './index.css';
 
 function AppContent() {
@@ -27,7 +28,9 @@ function AppContent() {
         <Header />
 
         <div className="content-area">
-          {symbolsToShow.length === 0 ? (
+          {activeView === 'auth' ? (
+              <Auth />
+          ) : symbolsToShow.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">📊</div>
               <h2>

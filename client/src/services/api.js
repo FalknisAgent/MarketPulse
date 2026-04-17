@@ -23,6 +23,11 @@ async function fetchAPI(endpoint, retries = MAX_RETRIES) {
 
         if (!response.ok) {
             const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+            if (error.error === 'GUEST_LIMIT_REACHED') {
+                const err = new Error(error.message);
+                err.isPaywall = true;
+                throw err;
+            }
             throw new Error(error.error || `HTTP ${response.status}`);
         }
 
@@ -42,6 +47,8 @@ async function fetchAPI(endpoint, retries = MAX_RETRIES) {
             return fetchAPI(endpoint, retries - 1);
         }
 
+        if (error.isPaywall) throw error; // Re-throw specialized paywall error without console logging
+        
         console.error(`API Error (${endpoint}):`, error.message);
         throw error;
     }
