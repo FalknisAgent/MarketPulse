@@ -206,8 +206,13 @@ export function AppProvider({ children }) {
             supabase.auth.getSession().then(({ data: { session } }) => {
                 dispatch({ type: ACTIONS.SET_AUTH, payload: { session, user: session?.user || null } });
             });
-            const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
                 dispatch({ type: ACTIONS.SET_AUTH, payload: { session, user: session?.user || null } });
+                
+                // Automatically switch back to watchlist on successful login/sign-up confirmation
+                if (event === 'SIGNED_IN') {
+                    dispatch({ type: ACTIONS.SET_VIEW, payload: 'watchlist' });
+                }
             });
             return () => subscription.unsubscribe();
         }
