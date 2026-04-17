@@ -1,18 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../../services/supabase';
 import { useApp } from '../../context/AppContext';
-import { Mail, Apple, Github, ArrowRight, ShieldCheck, Lock } from 'lucide-react';
+import { Mail, Apple, Github, ArrowRight, ShieldCheck, Lock, User, Save, LogOut } from 'lucide-react';
 import './Auth.css';
 
 const Auth = () => {
-    const { state } = useApp();
+    const { state, actions } = useApp();
     const [loading, setLoading] = useState(false);
+    
+    // Auth states
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
-    const [message, setMessage] = useState({ type: '', text: '' });
     const [isLogin, setIsLogin] = useState(true);
+
+    // Profile states (for logged in users)
+    const [profileEmail, setProfileEmail] = useState('');
+    const [profileFirstName, setProfileFirstName] = useState('');
+    const [profileLastName, setProfileLastName] = useState('');
+    
+    const [message, setMessage] = useState({ type: '', text: '' });
+
+    // Sync profile states when user changes
+    useEffect(() => {
+        if (state.user) {
+            setProfileEmail(state.user.email || '');
+            setProfileFirstName(state.user.user_metadata?.first_name || '');
+            setProfileLastName(state.user.user_metadata?.last_name || '');
+        }
+    }, [state.user]);
 
     const handleAuth = async (e) => {
         if (e) e.preventDefault();
@@ -53,8 +70,40 @@ const Auth = () => {
         }
     };
 
+    const handleUpdateProfile = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setMessage({ type: '', text: '' });
+
+        try {
+            const updates = {
+                data: {
+                    first_name: profileFirstName,
+                    last_name: profileLastName
+                }
+            };
+
+            // Only include email if it changed
+            if (profileEmail !== state.user.email) {
+                updates.email = profileEmail;
+            }
+
+            const { error } = await supabase.auth.updateUser(updates);
+            if (error) throw error;
+
+            if (updates.email) {
+                setMessage({ type: 'success', text: 'Profile updated. Please check both your old and new email addresses to confirm the change.' });
+            } else {
+                setMessage({ type: 'success', text: 'Profile updated successfully!' });
+            }
+        } catch (error) {
+            setMessage({ type: 'error', text: error.message || 'Failed to update profile' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSocialAuth = (provider) => {
-        // Placeholder for future OAuth (Google/Apple) implementation
         setMessage({ type: 'info', text: `${provider} authentication is coming soon.` });
     };
 
@@ -85,6 +134,102 @@ const Auth = () => {
         }
     };
 
+    // --- LOGGED IN VIEW ---
+    if (state.user) {
+        return (
+            <div className="auth-wrapper">
+                <div className="auth-container profile-container">
+                    <div className="auth-branding">
+                        <div className="branding-content">
+                            <h1>Account Settings</h1>
+                            <p className="branding-tagline">
+                                Manage your profile information and account preferences.
+                            </p>
+                            <div className="profile-summary">
+                                <div className="profile-avatar">
+                                    {(profileFirstName[0] || '').toUpperCase()}{(profileLastName[0] || '').toUpperCase()}
+                                </div>
+                                <div className="profile-info">
+                                    <h3>{profileFirstName} {profileLastName}</h3>
+                                    <p>{state.user.email}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="branding-decoration dec-1"></div>
+                        <div className="branding-decoration dec-2"></div>
+                    </div>
+
+                    <div className="auth-panel">
+                        <div className="auth-header profile-header">
+                            <h2>My Profile</h2>
+                            <p>Update your personal information below.</p>
+                        </div>
+
+                        {message.text && (
+                            <div className={`auth-message ${message.type}`}>
+                                {message.text}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleUpdateProfile} className="auth-form profile-form">
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label htmlFor="pFirstName">First name</label>
+                                    <input 
+                                        id="pFirstName" 
+                                        type="text" 
+                                        value={profileFirstName} 
+                                        onChange={(e) => setProfileFirstName(e.target.value)} 
+                                        required 
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="pLastName">Last name</label>
+                                    <input 
+                                        id="pLastName" 
+                                        type="text" 
+                                        value={profileLastName} 
+                                        onChange={(e) => setProfileLastName(e.target.value)} 
+                                        required 
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div className="form-group">
+                                <label htmlFor="pEmail">Email address</label>
+                                <input 
+                                    id="pEmail" 
+                                    type="email" 
+                                    value={profileEmail} 
+                                    onChange={(e) => setProfileEmail(e.target.value)} 
+                                    required 
+                                />
+                                <p className="input-hint">Changing your email requires verification.</p>
+                            </div>
+
+                            <div className="profile-actions">
+                                <button type="submit" className="btn btn-primary profile-submit" disabled={loading}>
+                                    <Save size={18} />
+                                    {loading ? 'Saving...' : 'Save Changes'}
+                                </button>
+                                
+                                <button 
+                                    type="button" 
+                                    className="btn btn-secondary profile-signout" 
+                                    onClick={() => supabase.auth.signOut()}
+                                >
+                                    <LogOut size={18} />
+                                    Sign Out
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // --- LOGGED OUT VIEW ---
     return (
         <div className="auth-wrapper">
             <div className="auth-container">
