@@ -40,23 +40,16 @@ function Sidebar() {
                     <span className="nav-badge sidebar-text">{state.watchlist.length}</span>
                 </button>
 
+                {state.user && (
                 <button
                     className={`nav-item ${activeView === 'portfolio' ? 'active' : ''}`}
-                    onClick={() => {
-                        if (!state.user) {
-                            actions.setView('auth');
-                        } else {
-                            actions.setView('portfolio');
-                        }
-                    }}
+                    onClick={() => actions.setView('portfolio')}
                 >
                     <Briefcase size={20} />
                     <span className="sidebar-text">Portfolio</span>
-                    {state.user
-                        ? <span className="nav-badge sidebar-text">{portfolio.length}</span>
-                        : <span className="nav-badge sidebar-text" style={{fontSize:'0.65rem'}}>🔒</span>
-                    }
+                    <span className="nav-badge sidebar-text">{portfolio.length}</span>
                 </button>
+                )}
 
                 <button
                     className={`nav-item ${activeView === 'auth' ? 'active' : ''}`}
