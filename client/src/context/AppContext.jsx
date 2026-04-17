@@ -29,7 +29,7 @@ const initialState = {
 
     // Currency
     selectedCurrency: 'USD',
-    fxRates: { USD: 1 }, // rates: 1 unit of currency → USD
+    fxRates: { USD: 1 }, // conversion rates: 1 unit of currency → USD
 };
 
 // Action types
@@ -248,6 +248,46 @@ export function AppProvider({ children }) {
         else { storage.saveWatchlist(state.watchlist); }
     }, [state.watchlist, state.user]);
 
+    // FX Rate Management
+    const refreshFXRates = useCallback(async () => {
+        // 1. Discover all unique currencies in use
+        const currencies = new Set([state.selectedCurrency]);
+        
+        // From watchlist data
+        Object.values(state.stockData).forEach(stock => {
+            if (stock.quote?.currency) currencies.add(stock.quote.currency.toUpperCase());
+        });
+        
+        // From portfolio
+        state.portfolio.forEach(holding => {
+            if (holding.currency) currencies.add(holding.currency.toUpperCase()); // Just in case holding has currency
+        });
+
+        // 2. Fetch rates for all unique currencies vs USD
+        const newRates = {};
+        for (const cur of currencies) {
+            if (cur === 'USD') continue;
+            try {
+                // We ask for USD -> CUR rate (e.g. 1 USD = 0.89 CHF)
+                const rate = await fetchRate('USD', cur);
+                newRates[cur] = rate;
+            } catch (err) {
+                console.warn(`Could not refresh FX for ${cur}`);
+            }
+        }
+
+        if (Object.keys(newRates).length > 0) {
+            dispatch({ type: ACTIONS.SET_FX_RATES, payload: newRates });
+        }
+    }, [state.selectedCurrency, state.stockData, state.portfolio]);
+
+    // Refresh FX rates every 10 minutes
+    useEffect(() => {
+        refreshFXRates();
+        const interval = setInterval(refreshFXRates, 10 * 60 * 1000);
+        return () => clearInterval(interval);
+    }, [refreshFXRates]);
+
     useEffect(() => {
         if (state.user) { cloudStorage.savePortfolio(state.user.id, state.portfolio); } 
         else { storage.savePortfolio(state.portfolio); }
@@ -304,6 +344,11 @@ export function AppProvider({ children }) {
                 type: ACTIONS.SET_STOCK_DATA,
                 payload: { symbol: upperSymbol, data: stockData }
             });
+
+            // Trigger FX refresh in case this is a new currency
+            if (stockData.quote.currency && stockData.quote.currency !== 'USD') {
+                refreshFXRates();
+            }
 
             return stockData;
         } catch (error) {
@@ -400,12 +445,7 @@ export function AppProvider({ children }) {
         // Currency actions
         setCurrency: async (currency) => {
             dispatch({ type: ACTIONS.SET_CURRENCY, payload: currency });
-            // Fetch rate from USD → currency and also currency → USD for the conversion map
-            // We store rates as: how many units of `currency` per 1 USD
-            if (currency !== 'USD') {
-                const rate = await fetchRate('USD', currency);
-                dispatch({ type: ACTIONS.SET_FX_RATES, payload: { [currency]: rate } });
-            }
+            // The refreshFXRates effect will pick up this change and fetch the rate
         },
 
         // Convert a price from its native currency to the selected display currency
