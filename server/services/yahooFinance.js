@@ -8,6 +8,10 @@ const yahooFinance = new YahooFinance({
     }
 });
 
+// Options passed to every yahoo-finance2 call to skip schema validation
+// (non-US stocks like SIKA.SW return extra/unexpected fields that fail validation)
+const NO_VALIDATE = { validateResult: false };
+
 // Validate stock symbol format (1-10 characters: letters, numbers, dots, dashes)
 const isValidSymbol = (symbol) => {
     return /^[A-Z0-9.-]{1,10}$/.test(symbol.toUpperCase());
@@ -28,7 +32,7 @@ async function getQuote(symbol) {
             throw new Error('Invalid symbol format');
         }
 
-        const quote = await yahooFinance.quote(sanitized);
+        const quote = await yahooFinance.quote(sanitized, {}, NO_VALIDATE);
         return {
             symbol: quote.symbol,
             shortName: quote.shortName || quote.longName,
@@ -87,7 +91,7 @@ async function getHistoricalData(symbol, period = 'max') {
             period1: dateRange.period1,
             period2: dateRange.period2,
             interval: period === '1m' ? '1d' : '1wk'
-        });
+        }, NO_VALIDATE);
 
         return {
             symbol: sanitized,
@@ -116,7 +120,6 @@ async function getFinancials(symbol) {
             throw new Error('Invalid symbol format');
         }
 
-        // All possible modules we want
         const allModules = [
             'financialData',
             'defaultKeyStatistics',
@@ -134,31 +137,34 @@ async function getFinancials(symbol) {
             'recommendationTrend'
         ];
 
-        // Fetch each module individually to be super resilient
-        const results = await Promise.all(allModules.map(module =>
-            yahooFinance.quoteSummary(sanitized, { modules: [module] })
-                .catch(err => {
-                    // Ignore errors for individual modules
-                    console.warn(`Module ${module} failed for ${symbol}:`, err.message);
-                    return null;
-                })
-        ));
+        // Batch: single quoteSummary call with all modules + fundamentalsTimeSeries in parallel
+        const [batchedResult, fundamentals] = await Promise.all([
+            yahooFinance.quoteSummary(sanitized, { modules: allModules }, NO_VALIDATE)
+                .catch(async (err) => {
+                    // Fallback: if batched call fails, try individual modules
+                    console.warn(`Batched quoteSummary failed for ${symbol}, falling back to individual modules:`, err.message);
+                    const results = await Promise.all(allModules.map(module =>
+                        yahooFinance.quoteSummary(sanitized, { modules: [module] }, NO_VALIDATE)
+                            .catch(innerErr => {
+                                console.warn(`Module ${module} failed for ${symbol}:`, innerErr.message);
+                                return null;
+                            })
+                    ));
+                    const merged = {};
+                    results.forEach(res => { if (res) Object.assign(merged, res); });
+                    return merged;
+                }),
+            yahooFinance.fundamentalsTimeSeries(sanitized, {
+                period1: getDateNYearsAgo(10),
+                period2: new Date(),
+                module: 'all'
+            }, NO_VALIDATE).catch(err => {
+                console.warn(`FundamentalsTimeSeries failed for ${symbol}:`, err.message);
+                return null;
+            })
+        ]);
 
-        // Merge results
-        const fullSummary = {};
-        results.forEach(res => {
-            if (res) Object.assign(fullSummary, res);
-        });
-
-        // Fetch fundamentals (historical)
-        const fundamentals = await yahooFinance.fundamentalsTimeSeries(sanitized, {
-            period1: getDateNYearsAgo(10),
-            period2: new Date(),
-            module: 'all'
-        }).catch(err => {
-            console.warn(`FundamentalsTimeSeries failed for ${symbol}:`, err.message);
-            return null;
-        });
+        const fullSummary = batchedResult || {};
 
         return {
             symbol: sanitized,

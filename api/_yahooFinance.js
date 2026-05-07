@@ -95,18 +95,29 @@ async function getFinancials(symbol) {
         'cashflowStatementHistory', 'cashflowStatementHistoryQuarterly',
         'earnings', 'earningsHistory', 'earningsTrend', 'recommendationTrend'
     ];
-    const results = await Promise.all(allModules.map(module =>
-        yahooFinance.quoteSummary(sanitized, { modules: [module] }, NO_VALIDATE)
-            .catch(() => null)
-    ));
-    const fullSummary = {};
-    results.forEach(res => { if (res) Object.assign(fullSummary, res); });
 
-    const fundamentals = await yahooFinance.fundamentalsTimeSeries(sanitized, {
-        period1: (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 10); return d; })(),
-        period2: new Date(),
-        module: 'all'
-    }, NO_VALIDATE).catch(() => null);
+    // Batch: single quoteSummary call with all modules + fundamentalsTimeSeries in parallel
+    const [batchedResult, fundamentals] = await Promise.all([
+        yahooFinance.quoteSummary(sanitized, { modules: allModules }, NO_VALIDATE)
+            .catch(async () => {
+                // Fallback: if batched call fails, try individual modules
+                console.warn(`Batched quoteSummary failed for ${sanitized}, falling back to individual modules`);
+                const results = await Promise.all(allModules.map(module =>
+                    yahooFinance.quoteSummary(sanitized, { modules: [module] }, NO_VALIDATE)
+                        .catch(() => null)
+                ));
+                const merged = {};
+                results.forEach(res => { if (res) Object.assign(merged, res); });
+                return merged;
+            }),
+        yahooFinance.fundamentalsTimeSeries(sanitized, {
+            period1: (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 10); return d; })(),
+            period2: new Date(),
+            module: 'all'
+        }, NO_VALIDATE).catch(() => null)
+    ]);
+
+    const fullSummary = batchedResult || {};
 
     return {
         symbol: sanitized,

@@ -294,8 +294,20 @@ export function AppProvider({ children }) {
     }, [refreshFXRates]);
 
     useEffect(() => {
-        if (state.user) { cloudStorage.savePortfolio(state.user.id, state.portfolio); } 
-        else { storage.savePortfolio(state.portfolio); }
+        if (state.user) {
+            cloudStorage.savePortfolio(state.user.id, state.portfolio).then(savedHoldings => {
+                // Reconcile Supabase-generated UUIDs back into local state
+                if (savedHoldings && savedHoldings.length > 0) {
+                    // Only update if IDs actually changed (avoid infinite loop)
+                    const idsChanged = savedHoldings.some((h, i) => h.id !== state.portfolio[i]?.id);
+                    if (idsChanged) {
+                        dispatch({ type: ACTIONS.SET_PORTFOLIO, payload: savedHoldings });
+                    }
+                }
+            });
+        } else {
+            storage.savePortfolio(state.portfolio);
+        }
     }, [state.portfolio, state.user]);
 
     // Fetch stock data
@@ -412,7 +424,7 @@ export function AppProvider({ children }) {
         addHolding: async (holding) => {
             const newHolding = {
                 ...holding,
-                id: holding.id || Date.now().toString(),
+                id: holding.id || crypto.randomUUID(),
                 symbol: holding.symbol.toUpperCase()
             };
 
