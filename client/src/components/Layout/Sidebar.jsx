@@ -31,6 +31,41 @@ function Sidebar() {
             </div>
 
             <nav className="sidebar-nav">
+                {state.user && (
+                    <div className="nav-group">
+                        <button
+                            className={`nav-item ${activeView === 'portfolio' ? 'active' : ''}`}
+                            onClick={() => actions.setView('portfolio')}
+                            style={{ marginBottom: portfolio.length > 0 ? '4px' : '0' }}
+                        >
+                            <Briefcase size={20} />
+                            <span className="sidebar-text">Portfolio</span>
+                            <span className="nav-badge sidebar-text">{portfolio.length}</span>
+                        </button>
+                        
+                        {portfolio.length > 0 && (
+                            <div className="sidebar-stats sidebar-text" style={{ margin: '0 0 16px 0', padding: '0 12px', background: 'transparent', border: 'none' }}>
+                                <div className="stat-card" style={{ padding: '8px 12px', marginBottom: '8px' }}>
+                                    <span className="stat-label">Portfolio Value</span>
+                                    <span className="stat-value" style={{ fontSize: '1.1rem' }}>
+                                        ${portfolioValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </span>
+                                </div>
+                                <div className="stat-card" style={{ padding: '8px 12px' }}>
+                                    <span className="stat-label">Total P/L</span>
+                                    <span className={`stat-value ${portfolioGain >= 0 ? 'price-up' : 'price-down'}`} style={{ fontSize: '1rem' }}>
+                                        {portfolioGain >= 0 ? '+' : ''}
+                                        ${portfolioGain.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        <small style={{ display: 'block', fontSize: '0.75rem', marginTop: '2px' }}>
+                                            ({portfolioGainPercent >= 0 ? '+' : ''}{portfolioGainPercent.toFixed(2)}%)
+                                        </small>
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 <button
                     className={`nav-item ${activeView === 'watchlist' ? 'active' : ''}`}
                     onClick={() => actions.setView('watchlist')}
@@ -40,17 +75,6 @@ function Sidebar() {
                     <span className="nav-badge sidebar-text">{state.watchlist.length}</span>
                 </button>
 
-                {state.user && (
-                <button
-                    className={`nav-item ${activeView === 'portfolio' ? 'active' : ''}`}
-                    onClick={() => actions.setView('portfolio')}
-                >
-                    <Briefcase size={20} />
-                    <span className="sidebar-text">Portfolio</span>
-                    <span className="nav-badge sidebar-text">{portfolio.length}</span>
-                </button>
-                )}
-
                 <button
                     className={`nav-item ${activeView === 'auth' ? 'active' : ''}`}
                     onClick={() => actions.setView('auth')}
@@ -59,25 +83,6 @@ function Sidebar() {
                     <span className="sidebar-text">{state.user ? 'My Account' : 'Sign In'}</span>
                 </button>
             </nav>
-
-            {portfolio.length > 0 && (
-                <div className="sidebar-stats sidebar-text">
-                    <div className="stat-card">
-                        <span className="stat-label">Portfolio Value</span>
-                        <span className="stat-value">
-                            ${portfolioValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
-                    </div>
-                    <div className="stat-card">
-                        <span className="stat-label">Total P/L</span>
-                        <span className={`stat-value ${portfolioGain >= 0 ? 'price-up' : 'price-down'}`}>
-                            {portfolioGain >= 0 ? '+' : ''}
-                            ${portfolioGain.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            <small> ({portfolioGainPercent >= 0 ? '+' : ''}{portfolioGainPercent.toFixed(2)}%)</small>
-                        </span>
-                    </div>
-                </div>
-            )}
 
             <div className="sidebar-footer">
                 <button

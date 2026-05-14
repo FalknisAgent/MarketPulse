@@ -9,7 +9,7 @@ import { fetchRate, convertPrice as fxConvert, getCurrencySymbol } from '../serv
 // Initial state
 const initialState = {
     // View state
-    activeView: 'watchlist', // 'watchlist' | 'portfolio' | 'auth'
+    activeView: 'portfolio', // 'watchlist' | 'portfolio' | 'auth'
     expandedStock: null,
     paywallMessage: null,
     
@@ -224,9 +224,9 @@ export function AppProvider({ children }) {
             const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
                 dispatch({ type: ACTIONS.SET_AUTH, payload: { session, user: session?.user || null } });
                 
-                // Automatically switch back to watchlist on successful login/sign-up confirmation
+                // Automatically switch to portfolio on successful login/sign-up confirmation
                 if (event === 'SIGNED_IN') {
-                    dispatch({ type: ACTIONS.SET_VIEW, payload: 'watchlist' });
+                    dispatch({ type: ACTIONS.SET_VIEW, payload: 'portfolio' });
                 }
             });
             return () => subscription.unsubscribe();
