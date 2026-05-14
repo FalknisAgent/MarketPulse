@@ -65,13 +65,47 @@ function PortfolioOverview() {
         const totalGain = totalValue - totalInvested;
         const totalGainPct = totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0;
 
+        let allocations = [];
+        symbols.forEach(symbol => {
+            const txs = portfolio.filter(t => t.symbol === symbol);
+            let shares = 0;
+            let costBasis = 0;
+            txs.forEach(tx => {
+                if (tx.type === 'SELL') {
+                    const avgCost = shares > 0 ? (costBasis / shares) : 0;
+                    shares -= tx.shares;
+                    costBasis -= (tx.shares * avgCost);
+                } else {
+                    shares += tx.shares;
+                    costBasis += (tx.shares * tx.price) + (tx.fees || 0) + (tx.tax || 0);
+                }
+            });
+            if (shares > 0) {
+                const stock = stockData[symbol];
+                const stockCurrency = stock?.quote?.currency || 'USD';
+                const currentPrice = stock?.quote?.price !== undefined ? stock.quote.price : (costBasis / shares);
+                const holdingValue = shares * currentPrice;
+                const valueInSelected = actions.convertPrice(holdingValue, stockCurrency) || 0;
+                
+                allocations.push({
+                    symbol,
+                    value: valueInSelected,
+                    percentage: totalValue > 0 ? (valueInSelected / totalValue) * 100 : 0
+                });
+            }
+        });
+        
+        // Sort allocations by value descending
+        allocations.sort((a, b) => b.value - a.value);
+
         return {
             totalInvested,
             totalValue,
             totalGain,
             totalGainPct,
             totalDailyChange,
-            totalRealizedGains
+            totalRealizedGains,
+            allocations
         };
     }, [portfolio, stockData, state.fxRates, selectedCurrency, actions]);
 
@@ -168,20 +202,37 @@ function PortfolioOverview() {
             {/* Performance Chart */}
             <PortfolioChart />
 
-            {/* Asset Classes Card */}
+            {/* Asset Allocation Card */}
             <div className="portfolio-overview-card">
-                <h3 className="card-title">Your Asset Classes</h3>
+                <h3 className="card-title">Portfolio Allocation</h3>
                 <div className="asset-classes">
-                    <div className="asset-class-item">
-                        <div className="asset-class-header">
-                            <div className="asset-icon bg-purple">📈</div>
-                            <span className="asset-name">Equities</span>
-                            <span className="asset-value">{formatCurrency(metrics.totalValue)}</span>
-                        </div>
-                        <div className="asset-bar-bg">
-                            <div className="asset-bar-fill fill-purple" style={{ width: '100%' }}></div>
-                        </div>
-                    </div>
+                    {metrics.allocations.length === 0 ? (
+                        <div className="text-muted" style={{ fontSize: '0.9rem' }}>No active positions.</div>
+                    ) : (
+                        metrics.allocations.map((alloc, index) => {
+                            // Assign a distinct color based on index
+                            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+                            const color = colors[index % colors.length];
+                            
+                            return (
+                                <div key={alloc.symbol} className="asset-class-item">
+                                    <div className="asset-class-header">
+                                        <div className="asset-icon" style={{ backgroundColor: `${color}20`, color: color }}>
+                                            {alloc.symbol.charAt(0)}
+                                        </div>
+                                        <span className="asset-name">{alloc.symbol}</span>
+                                        <div style={{ flex: 1, textAlign: 'right', marginRight: '16px', fontWeight: 600, fontSize: '0.85rem' }}>
+                                            {alloc.percentage.toFixed(1)}%
+                                        </div>
+                                        <span className="asset-value">{formatCurrency(alloc.value)}</span>
+                                    </div>
+                                    <div className="asset-bar-bg">
+                                        <div className="asset-bar-fill" style={{ width: `${alloc.percentage}%`, backgroundColor: color }}></div>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
                 </div>
             </div>
         </div>

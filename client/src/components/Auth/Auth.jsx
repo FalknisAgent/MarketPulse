@@ -210,7 +210,7 @@ const Auth = () => {
                             <div className="profile-actions">
                                 <button type="submit" className="btn btn-primary profile-submit" disabled={loading}>
                                     <Save size={18} />
-                                    {loading ? 'Saving...' : 'Save Changes'}
+                                    {loading ? 'Saving...' : 'Save Profile Changes'}
                                 </button>
                                 
                                 <button 
@@ -223,6 +223,44 @@ const Auth = () => {
                                 </button>
                             </div>
                         </form>
+
+                        <div className="auth-header profile-header" style={{ marginTop: '40px' }}>
+                            <h2>App Preferences</h2>
+                            <p>Customize your MoatWise experience.</p>
+                        </div>
+                        
+                        <div className="auth-form profile-form">
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label htmlFor="prefCurrency">Standard Currency</label>
+                                    <select 
+                                        id="prefCurrency" 
+                                        className="input" 
+                                        value={state.selectedCurrency} 
+                                        onChange={(e) => actions.setCurrency(e.target.value)}
+                                    >
+                                        <option value="USD">USD ($)</option>
+                                        <option value="EUR">EUR (€)</option>
+                                        <option value="GBP">GBP (£)</option>
+                                        <option value="CHF">CHF (₣)</option>
+                                        <option value="CAD">CAD ($)</option>
+                                        <option value="AUD">AUD ($)</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="prefTheme">Theme</label>
+                                    <select 
+                                        id="prefTheme" 
+                                        className="input" 
+                                        value={state.theme || 'light'} 
+                                        onChange={(e) => actions.setTheme(e.target.value)}
+                                    >
+                                        <option value="light">Light Mode</option>
+                                        <option value="dark">Dark Mode</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

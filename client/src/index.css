@@ -73,6 +73,40 @@
   --font-family: 'Inter', -apple-system, sans-serif;
 }
 
+[data-theme="dark"] {
+  /* Backgrounds */
+  --color-bg-app: #0f172a;       /* Slate 900 */
+  --color-bg-card: #1e293b;      /* Slate 800 */
+  --color-bg-header: #1e293b;
+  --color-bg-sidebar: #1e293b;
+  --color-bg-hover: #334155;     /* Slate 700 */
+
+  /* Text */
+  --color-text-primary: #f8fafc; /* Slate 50 */
+  --color-text-secondary: #cbd5e1; /* Slate 300 */
+  --color-text-muted: #94a3b8;   /* Slate 400 */
+
+  /* Accent Colors */
+  --color-accent: #ffffff;
+  --color-accent-blue: #3b82f6;  /* Blue 500 */
+
+  /* Status Colors */
+  --color-success: #22c55e;      /* Green 500 */
+  --color-success-bg: rgba(34, 197, 94, 0.1);
+  --color-danger: #ef4444;       /* Red 500 */
+  --color-danger-bg: rgba(239, 68, 68, 0.1);
+  --color-warning: #f59e0b;      /* Amber 500 */
+
+  /* Borders */
+  --color-border: #334155;       /* Slate 700 */
+  --color-border-hover: #475569; /* Slate 600 */
+
+  /* Shadows - Dark mode shadows can be darker or rely more on borders */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -1px rgb(0 0 0 / 0.3);
+  --shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 0.4);
+}
+
 body {
   margin: 0;
   padding: 0;

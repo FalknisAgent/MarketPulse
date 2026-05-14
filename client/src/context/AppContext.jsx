@@ -181,6 +181,9 @@ function appReducer(state, action) {
 
         case ACTIONS.SET_CURRENCY:
             return { ...state, selectedCurrency: action.payload };
+            
+        case ACTIONS.SET_THEME:
+            return { ...state, theme: action.payload };
 
         case ACTIONS.SET_FX_RATES:
             return { ...state, fxRates: { ...state.fxRates, ...action.payload } };
@@ -198,19 +201,26 @@ const AppContext = createContext(null);
 
 // Provider component
 export function AppProvider({ children }) {
-    const [state, dispatch] = useReducer(appReducer, initialState);
+    const [state, dispatch] = useReducer(appReducer, {
+        ...initialState,
+        theme: storage.getSettings().theme || 'light',
+        selectedCurrency: storage.getSettings().currency || 'USD'
+    });
 
     // Load data from storage on mount
     useEffect(() => {
         const watchlist = storage.getWatchlist();
         const portfolio = storage.getPortfolio();
         const lastUpdate = storage.getLastUpdate();
+        const settings = storage.getSettings();
 
         dispatch({ type: ACTIONS.SET_WATCHLIST, payload: watchlist });
         dispatch({ type: ACTIONS.SET_PORTFOLIO, payload: portfolio });
         if (lastUpdate) {
             dispatch({ type: ACTIONS.SET_LAST_UPDATE, payload: lastUpdate });
         }
+        dispatch({ type: ACTIONS.SET_THEME, payload: settings.theme || 'light' });
+        dispatch({ type: ACTIONS.SET_CURRENCY, payload: settings.currency || 'USD' });
 
         // Check API health
         api.checkHealth().then(healthy => {
@@ -509,7 +519,15 @@ export function AppProvider({ children }) {
         // Currency actions
         setCurrency: async (currency) => {
             dispatch({ type: ACTIONS.SET_CURRENCY, payload: currency });
-            // The refreshFXRates effect will pick up this change and fetch the rate
+            const settings = storage.getSettings() || {};
+            storage.saveSettings({ ...settings, currency });
+        },
+
+        // Theme actions
+        setTheme: (theme) => {
+            dispatch({ type: ACTIONS.SET_THEME, payload: theme });
+            const settings = storage.getSettings() || {};
+            storage.saveSettings({ ...settings, theme });
         },
 
         // Convert a price from its native currency to the selected display currency

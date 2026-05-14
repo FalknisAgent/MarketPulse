@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { AppProvider, useApp } from './context/AppContext';
 import Sidebar from './components/Layout/Sidebar';
@@ -10,8 +10,13 @@ import './index.css';
 
 function AppContent() {
   const { state, actions } = useApp();
-  const { activeView, watchlist, portfolio } = state;
+  const { activeView, watchlist, portfolio, theme } = state;
   const [showDisclaimer, setShowDisclaimer] = useState(true);
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   // Get unique symbols for portfolio view (only active positions)
   const portfolioSymbols = [...new Set(portfolio.map(h => h.symbol))].filter(symbol => {
