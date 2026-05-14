@@ -66,35 +66,46 @@ export function removeFromWatchlist(symbol) {
 }
 
 /**
- * Get portfolio holdings from storage
- * @returns {Array<Object>} Array of holdings
+ * Get portfolio transactions from storage
+ * @returns {Array<Object>} Array of transactions
  */
 export function getPortfolio() {
     const data = localStorage.getItem(STORAGE_KEYS.PORTFOLIO);
-    return safeJSONParse(data, []);
+    const parsed = safeJSONParse(data, []);
+    // Map legacy 'holdings' format to new 'transaction' format just in case
+    return parsed.map(item => ({
+        id: item.id,
+        symbol: item.symbol,
+        type: item.type || 'BUY', // Legacy items are assumed to be BUYs
+        shares: Number(item.shares),
+        price: Number(item.price !== undefined ? item.price : item.buyPrice),
+        fees: Number(item.fees || 0),
+        tax: Number(item.tax || 0),
+        date: item.date || item.buyDate
+    }));
 }
 
 /**
- * Save portfolio to storage
- * @param {Array<Object>} portfolio - Array of holdings
+ * Save portfolio transactions to storage
+ * @param {Array<Object>} transactions - Array of transactions
  */
-export function savePortfolio(portfolio) {
-    localStorage.setItem(STORAGE_KEYS.PORTFOLIO, JSON.stringify(portfolio));
+export function savePortfolio(transactions) {
+    localStorage.setItem(STORAGE_KEYS.PORTFOLIO, JSON.stringify(transactions));
 }
 
 /**
- * Add or update holding in portfolio
- * @param {Object} holding - { symbol, shares, buyPrice, buyDate }
+ * Add or update transaction in portfolio
+ * @param {Object} transaction - { symbol, type, shares, price, date, fees, tax }
  */
-export function addHolding(holding) {
+export function addHolding(transaction) {
     const portfolio = getPortfolio();
-    const existingIndex = portfolio.findIndex(h => h.id === holding.id);
+    const existingIndex = portfolio.findIndex(h => h.id === transaction.id);
 
-    if (existingIndex >= 0) {
-        portfolio[existingIndex] = holding;
+    if (existingIndex >= 0 && transaction.id) {
+        portfolio[existingIndex] = transaction;
     } else {
-        holding.id = Date.now().toString();
-        portfolio.push(holding);
+        transaction.id = transaction.id || crypto.randomUUID();
+        portfolio.push(transaction);
     }
 
     savePortfolio(portfolio);
@@ -102,8 +113,8 @@ export function addHolding(holding) {
 }
 
 /**
- * Remove holding from portfolio
- * @param {string} id - Holding ID
+ * Remove transaction from portfolio
+ * @param {string} id - Transaction ID
  */
 export function removeHolding(id) {
     const portfolio = getPortfolio();

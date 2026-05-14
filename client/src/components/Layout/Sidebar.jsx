@@ -5,21 +5,7 @@ function Sidebar() {
     const { state, actions } = useApp();
     const { activeView, portfolio, stockData, isLoading } = state;
 
-    // Calculate portfolio totals
-    const portfolioValue = portfolio.reduce((total, holding) => {
-        const quote = stockData?.[holding.symbol]?.quote;
-        if (quote?.price) {
-            return total + (quote.price * holding.shares);
-        }
-        return total;
-    }, 0);
-
-    const portfolioCost = portfolio.reduce((total, holding) => {
-        return total + (holding.buyPrice * holding.shares);
-    }, 0);
-
-    const portfolioGain = portfolioValue - portfolioCost;
-    const portfolioGainPercent = portfolioCost > 0 ? (portfolioGain / portfolioCost) * 100 : 0;
+    // Portfolio totals removed as per request
 
     return (
         <aside className="sidebar">
@@ -43,26 +29,7 @@ function Sidebar() {
                             <span className="nav-badge sidebar-text">{portfolio.length}</span>
                         </button>
                         
-                        {portfolio.length > 0 && (
-                            <div className="sidebar-stats sidebar-text" style={{ margin: '0 0 16px 0', padding: '0 12px', background: 'transparent', border: 'none' }}>
-                                <div className="stat-card" style={{ padding: '8px 12px', marginBottom: '8px' }}>
-                                    <span className="stat-label">Portfolio Value</span>
-                                    <span className="stat-value" style={{ fontSize: '1.1rem' }}>
-                                        ${portfolioValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                    </span>
-                                </div>
-                                <div className="stat-card" style={{ padding: '8px 12px' }}>
-                                    <span className="stat-label">Total P/L</span>
-                                    <span className={`stat-value ${portfolioGain >= 0 ? 'price-up' : 'price-down'}`} style={{ fontSize: '1rem' }}>
-                                        {portfolioGain >= 0 ? '+' : ''}
-                                        ${portfolioGain.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                        <small style={{ display: 'block', fontSize: '0.75rem', marginTop: '2px' }}>
-                                            ({portfolioGainPercent >= 0 ? '+' : ''}{portfolioGainPercent.toFixed(2)}%)
-                                        </small>
-                                    </span>
-                                </div>
-                            </div>
-                        )}
+                        {/* Removed portfolio stats as per request */}
                     </div>
                 )}
 

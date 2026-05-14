@@ -40,10 +40,29 @@ function StockCard({ symbol, showHoldings = false }) {
         }
     }, [symbol, stockData, isLoading, state.stockData, actions]);
 
-    // Get holdings for this stock
-    const holdings = state.portfolio.filter(h => h.symbol === symbol);
-    const totalShares = holdings.reduce((sum, h) => sum + h.shares, 0);
-    const totalCost = holdings.reduce((sum, h) => sum + (h.shares * h.buyPrice), 0);
+    // Get transactions for this stock
+    const transactions = state.portfolio.filter(h => h.symbol === symbol);
+    
+    // Calculate totalShares and totalCost using Average Cost method
+    let totalShares = 0;
+    let totalCost = 0;
+
+    const sortedTx = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    sortedTx.forEach(tx => {
+        if (tx.type === 'SELL') {
+            const avgCost = totalShares > 0 ? (totalCost / totalShares) : 0;
+            totalShares -= tx.shares;
+            totalCost -= (tx.shares * avgCost);
+            // In a strict average cost, sell fees might be tracked separately for P/L
+            // but they don't increase the remaining cost basis of the holdings.
+        } else {
+            // Default to BUY
+            totalShares += tx.shares;
+            totalCost += (tx.shares * tx.price) + (tx.fees || 0) + (tx.tax || 0);
+        }
+    });
+
     const currentValue = quote?.price ? totalShares * quote.price : 0;
     const totalGain = currentValue - totalCost;
     const gainPercent = totalCost > 0 ? (totalGain / totalCost) * 100 : 0;
@@ -254,25 +273,29 @@ function StockCard({ symbol, showHoldings = false }) {
                         {activeTab === 'holdings' && showHoldings && (
                             <div className="holdings-panel-clean">
                                 <div className="holdings-header-clean">
-                                    <h4>Your Positions</h4>
+                                    <h4>Transactions</h4>
                                     <button className="btn btn-primary btn-sm" onClick={() => setShowAddHolding(true)}>
-                                        <PlusCircle size={16} /> Add Position
+                                        <PlusCircle size={16} /> Add Transaction
                                     </button>
                                 </div>
 
-                                {holdings.length === 0 ? (
+                                {transactions.length === 0 ? (
                                     <div className="empty-holdings">
-                                        <p>No active positions.</p>
+                                        <p>No transactions yet.</p>
                                     </div>
                                 ) : (
                                     <div className="holdings-list-clean">
-                                        {holdings.map(h => (
-                                            <div key={h.id} className="holding-row">
-                                                <div className="h-info">
-                                                    <span className="h-shares">{h.shares} shares</span>
-                                                    <span className="h-price">@ ${h.buyPrice.toFixed(2)}</span>
+                                        {[...transactions].sort((a,b) => new Date(b.date) - new Date(a.date)).map(tx => (
+                                            <div key={tx.id} className="holding-row">
+                                                <div className="h-info" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                                    <span className={`tx-type badge ${tx.type === 'SELL' ? 'bg-red' : 'bg-green'}`} style={{ padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold' }}>
+                                                        {tx.type}
+                                                    </span>
+                                                    <span className="h-shares">{tx.shares} shares</span>
+                                                    <span className="h-price">@ ${tx.price.toFixed(2)}</span>
+                                                    <span className="h-date text-muted" style={{ fontSize: '0.75rem' }}>{new Date(tx.date).toLocaleDateString()}</span>
                                                 </div>
-                                                <button className="btn-icon-sm" onClick={() => actions.removeHolding(h.id)}><X size={14} /></button>
+                                                <button className="btn-icon-sm" onClick={() => actions.removeHolding(tx.id)}><X size={14} /></button>
                                             </div>
                                         ))}
                                     </div>

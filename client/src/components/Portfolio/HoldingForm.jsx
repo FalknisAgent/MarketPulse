@@ -4,45 +4,37 @@ import { useApp } from '../../context/AppContext';
 import './HoldingForm.css';
 
 function HoldingForm({ symbol, existingHolding, onClose }) {
-    const { actions } = useApp();
+    const { state, actions } = useApp();
 
+    const [type, setType] = useState(existingHolding?.type || 'BUY');
     const [formData, setFormData] = useState({
         symbol: symbol || existingHolding?.symbol || '',
         shares: existingHolding?.shares || '',
-        buyPrice: existingHolding?.buyPrice || '',
-        fees: existingHolding?.fees || '0',  // NEW
-        tax: existingHolding?.tax || '0',    // NEW
-        buyDate: existingHolding?.buyDate || new Date().toISOString().split('T')[0]
+        price: existingHolding?.price || '',
+        fees: existingHolding?.fees || '0',
+        tax: existingHolding?.tax || '0',
+        date: existingHolding?.date || new Date().toISOString().split('T')[0]
     });
 
     const [errors, setErrors] = useState({});
 
+    // Calculate max shares available to sell
+    const currentShares = state.portfolio
+        .filter(t => t.symbol === formData.symbol.toUpperCase())
+        .reduce((sum, t) => t.type === 'SELL' ? sum - t.shares : sum + t.shares, 0);
+
     const validate = () => {
         const newErrors = {};
 
-        if (!formData.symbol) {
-            newErrors.symbol = 'Symbol is required';
-        }
+        if (!formData.symbol) newErrors.symbol = 'Symbol is required';
+        if (!formData.shares || parseFloat(formData.shares) <= 0) newErrors.shares = 'Enter a valid number of shares';
+        if (!formData.price || parseFloat(formData.price) <= 0) newErrors.price = 'Enter a valid price';
+        if (parseFloat(formData.fees) < 0) newErrors.fees = 'Fees cannot be negative';
+        if (parseFloat(formData.tax) < 0) newErrors.tax = 'Tax cannot be negative';
+        if (!formData.date) newErrors.date = 'Date is required';
 
-        // Float validation for shares
-        if (!formData.shares || parseFloat(formData.shares) <= 0) {
-            newErrors.shares = 'Enter a valid number of shares';
-        }
-
-        if (!formData.buyPrice || parseFloat(formData.buyPrice) <= 0) {
-            newErrors.buyPrice = 'Enter a valid buy price';
-        }
-
-        if (parseFloat(formData.fees) < 0) {
-            newErrors.fees = 'Fees cannot be negative';
-        }
-
-        if (parseFloat(formData.tax) < 0) {
-            newErrors.tax = 'Tax cannot be negative';
-        }
-
-        if (!formData.buyDate) {
-            newErrors.buyDate = 'Date is required';
+        if (type === 'SELL' && parseFloat(formData.shares) > currentShares) {
+            newErrors.shares = `You only have ${currentShares} shares available to sell.`;
         }
 
         setErrors(newErrors);
@@ -58,15 +50,16 @@ function HoldingForm({ symbol, existingHolding, onClose }) {
             await actions.addHolding({
                 id: existingHolding?.id,
                 symbol: formData.symbol.toUpperCase(),
-                shares: parseFloat(formData.shares), // Already supports float
-                buyPrice: parseFloat(formData.buyPrice),
-                fees: parseFloat(formData.fees || 0), // NEW
-                tax: parseFloat(formData.tax || 0),   // NEW
-                buyDate: formData.buyDate
+                type,
+                shares: parseFloat(formData.shares),
+                price: parseFloat(formData.price),
+                fees: parseFloat(formData.fees || 0),
+                tax: parseFloat(formData.tax || 0),
+                date: formData.date
             });
             onClose();
         } catch (err) {
-            setErrors({ submit: 'Failed to save holding' });
+            setErrors({ submit: 'Failed to save transaction' });
         }
     };
 
@@ -81,11 +74,32 @@ function HoldingForm({ symbol, existingHolding, onClose }) {
         <div className="holding-form-overlay">
             <div className="holding-form">
                 <div className="form-header">
-                    <h3>{existingHolding ? 'Edit Position' : 'Add Position'}</h3>
+                    <h3>{existingHolding ? 'Edit Transaction' : 'Add Transaction'}</h3>
                     <button className="btn btn-ghost btn-icon" onClick={onClose}>
                         <X size={20} />
                     </button>
                 </div>
+
+                {!existingHolding && (
+                    <div className="tx-type-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                        <button 
+                            type="button"
+                            className={`btn ${type === 'BUY' ? 'btn-primary' : 'btn-outline'}`} 
+                            style={{ flex: 1, backgroundColor: type === 'BUY' ? 'var(--color-success)' : 'transparent', borderColor: 'var(--color-success)' }}
+                            onClick={() => setType('BUY')}
+                        >
+                            BUY
+                        </button>
+                        <button 
+                            type="button"
+                            className={`btn ${type === 'SELL' ? 'btn-primary' : 'btn-outline'}`} 
+                            style={{ flex: 1, backgroundColor: type === 'SELL' ? 'var(--color-danger)' : 'transparent', borderColor: 'var(--color-danger)' }}
+                            onClick={() => setType('SELL')}
+                        >
+                            SELL
+                        </button>
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
@@ -104,11 +118,12 @@ function HoldingForm({ symbol, existingHolding, onClose }) {
 
                     <div className="form-row">
                         <div className="form-group">
-                            <label htmlFor="shares">Quantity</label>
+                            <label htmlFor="shares">Shares</label>
                             <input
                                 id="shares"
                                 type="number"
-                                step="any" // Allows float
+                                step="any"
+                                min="0.000001"
                                 className={`input ${errors.shares ? 'input-error' : ''}`}
                                 value={formData.shares}
                                 onChange={(e) => handleChange('shares', e.target.value)}
@@ -118,28 +133,28 @@ function HoldingForm({ symbol, existingHolding, onClose }) {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="buyPrice">Buy Price ($)</label>
+                            <label htmlFor="price">Price (Native Currency)</label>
                             <input
-                                id="buyPrice"
+                                id="price"
                                 type="number"
-                                step="0.01"
-                                className={`input ${errors.buyPrice ? 'input-error' : ''}`}
-                                value={formData.buyPrice}
-                                onChange={(e) => handleChange('buyPrice', e.target.value)}
+                                step="any"
+                                min="0.01"
+                                className={`input ${errors.price ? 'input-error' : ''}`}
+                                value={formData.price}
+                                onChange={(e) => handleChange('price', e.target.value)}
                                 placeholder="150.00"
                             />
-                            {errors.buyPrice && <span className="error-text">{errors.buyPrice}</span>}
+                            {errors.price && <span className="error-text">{errors.price}</span>}
                         </div>
                     </div>
 
-                    {/* NEW ROW FOR FEES AND TAX */}
                     <div className="form-row">
                         <div className="form-group">
-                            <label htmlFor="fees">Fees ($)</label>
+                            <label htmlFor="fees">Fees (Native Currency)</label>
                             <input
                                 id="fees"
                                 type="number"
-                                step="0.01"
+                                step="any"
                                 className={`input ${errors.fees ? 'input-error' : ''}`}
                                 value={formData.fees}
                                 onChange={(e) => handleChange('fees', e.target.value)}
@@ -149,11 +164,11 @@ function HoldingForm({ symbol, existingHolding, onClose }) {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="tax">Tax ($)</label>
+                            <label htmlFor="tax">Tax (Native Currency)</label>
                             <input
                                 id="tax"
                                 type="number"
-                                step="0.01"
+                                step="any"
                                 className={`input ${errors.tax ? 'input-error' : ''}`}
                                 value={formData.tax}
                                 onChange={(e) => handleChange('tax', e.target.value)}
@@ -164,15 +179,15 @@ function HoldingForm({ symbol, existingHolding, onClose }) {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="buyDate">Purchase Date</label>
+                        <label htmlFor="date">Transaction Date</label>
                         <input
-                            id="buyDate"
+                            id="date"
                             type="date"
-                            className={`input ${errors.buyDate ? 'input-error' : ''}`}
-                            value={formData.buyDate}
-                            onChange={(e) => handleChange('buyDate', e.target.value)}
+                            className={`input ${errors.date ? 'input-error' : ''}`}
+                            value={formData.date}
+                            onChange={(e) => handleChange('date', e.target.value)}
                         />
-                        {errors.buyDate && <span className="error-text">{errors.buyDate}</span>}
+                        {errors.date && <span className="error-text">{errors.date}</span>}
                     </div>
 
                     {errors.submit && (
@@ -184,7 +199,7 @@ function HoldingForm({ symbol, existingHolding, onClose }) {
                             Cancel
                         </button>
                         <button type="submit" className="btn btn-primary">
-                            {existingHolding ? 'Update Position' : 'Add Position'}
+                            {existingHolding ? 'Update Transaction' : 'Save Transaction'}
                         </button>
                     </div>
                 </form>

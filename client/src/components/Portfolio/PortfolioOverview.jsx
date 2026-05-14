@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
+import PortfolioChart from './PortfolioChart';
 import './PortfolioOverview.css';
 
 function PortfolioOverview() {
@@ -10,27 +11,55 @@ function PortfolioOverview() {
         let totalInvested = 0;
         let totalValue = 0;
         let totalDailyChange = 0;
+        let totalRealizedGains = 0;
 
-        portfolio.forEach(holding => {
-            const stock = stockData[holding.symbol];
+        // Group transactions by symbol
+        const symbols = [...new Set(portfolio.map(tx => tx.symbol))];
+
+        symbols.forEach(symbol => {
+            const txs = portfolio.filter(t => t.symbol === symbol).sort((a,b) => new Date(a.date) - new Date(b.date));
+            const stock = stockData[symbol];
             const stockCurrency = stock?.quote?.currency || 'USD';
-            
-            // Calculate invested
-            const holdingInvested = (holding.shares * holding.buyPrice) + (holding.fees || 0) + (holding.tax || 0);
-            const investedInSelected = actions.convertPrice(holdingInvested, stockCurrency);
+
+            let shares = 0;
+            let costBasis = 0;
+            let realized = 0;
+
+            txs.forEach(tx => {
+                if (tx.type === 'SELL') {
+                    const avgCost = shares > 0 ? (costBasis / shares) : 0;
+                    shares -= tx.shares;
+                    costBasis -= (tx.shares * avgCost);
+                    
+                    // Realized gain = Net Proceeds - Cost Basis of shares sold
+                    const netProceeds = (tx.shares * tx.price) - (tx.fees || 0) - (tx.tax || 0);
+                    realized += netProceeds - (tx.shares * avgCost);
+                } else {
+                    // BUY
+                    shares += tx.shares;
+                    costBasis += (tx.shares * tx.price) + (tx.fees || 0) + (tx.tax || 0);
+                }
+            });
+
+            // Convert to selected currency
+            const investedInSelected = actions.convertPrice(costBasis, stockCurrency);
             totalInvested += investedInSelected || 0;
 
-            // Calculate current value
-            const currentPrice = stock?.quote?.regularMarketPrice || holding.buyPrice;
-            const holdingValue = holding.shares * currentPrice;
-            const valueInSelected = actions.convertPrice(holdingValue, stockCurrency);
-            totalValue += valueInSelected || 0;
+            const realizedInSelected = actions.convertPrice(realized, stockCurrency);
+            totalRealizedGains += realizedInSelected || 0;
 
-            // Calculate daily change
-            const dailyChange = stock?.quote?.regularMarketChange || 0;
-            const holdingDailyChange = holding.shares * dailyChange;
-            const changeInSelected = actions.convertPrice(holdingDailyChange, stockCurrency);
-            totalDailyChange += changeInSelected || 0;
+            // Only calculate current value & daily change for remaining active shares
+            if (shares > 0) {
+                const currentPrice = stock?.quote?.price !== undefined ? stock.quote.price : (costBasis / shares);
+                const holdingValue = shares * currentPrice;
+                const valueInSelected = actions.convertPrice(holdingValue, stockCurrency);
+                totalValue += valueInSelected || 0;
+
+                const dailyChange = stock?.quote?.change || 0;
+                const holdingDailyChange = shares * dailyChange;
+                const changeInSelected = actions.convertPrice(holdingDailyChange, stockCurrency);
+                totalDailyChange += changeInSelected || 0;
+            }
         });
 
         const totalGain = totalValue - totalInvested;
@@ -41,7 +70,8 @@ function PortfolioOverview() {
             totalValue,
             totalGain,
             totalGainPct,
-            totalDailyChange
+            totalDailyChange,
+            totalRealizedGains
         };
     }, [portfolio, stockData, state.fxRates, selectedCurrency, actions]);
 
@@ -120,10 +150,10 @@ function PortfolioOverview() {
                             {metrics.totalDailyChange >= 0 ? '+' : ''}{formatCurrency(metrics.totalDailyChange)}
                         </div>
                     </div>
-                    <div className="metric-box disabled">
+                    <div className="metric-box">
                         <div className="metric-label">Realized Gains</div>
-                        <div className="metric-value text-muted">
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: selectedCurrency }).format(0)}
+                        <div className={`metric-value ${metrics.totalRealizedGains >= 0 ? 'text-success' : 'text-danger'}`}>
+                            {metrics.totalRealizedGains >= 0 ? '+' : ''}{formatCurrency(metrics.totalRealizedGains)}
                         </div>
                     </div>
                     <div className="metric-box disabled">
@@ -134,6 +164,9 @@ function PortfolioOverview() {
                     </div>
                 </div>
             </div>
+
+            {/* Performance Chart */}
+            <PortfolioChart />
 
             {/* Asset Classes Card */}
             <div className="portfolio-overview-card">

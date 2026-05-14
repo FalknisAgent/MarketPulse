@@ -53,83 +53,85 @@ export const cloudStorage = {
     async getPortfolio(userId) {
         if (!supabase) return [];
         const { data, error } = await supabase
-            .from('portfolio_holdings')
+            .from('portfolio_transactions')
             .select('*')
             .eq('user_id', userId);
             
         if (error) {
-            console.error('Error fetching portfolio:', error);
+            console.error('Error fetching transactions:', error);
             return [];
         }
-        return data.map(holding => ({
-            id: holding.id,       // Supabase-generated UUID
-            symbol: holding.symbol,
-            shares: Number(holding.shares),
-            buyPrice: Number(holding.buy_price),
-            fees: Number(holding.fees || 0),
-            tax: Number(holding.tax || 0),
-            buyDate: holding.buy_date
+        return data.map(tx => ({
+            id: tx.id,
+            symbol: tx.symbol,
+            type: tx.type, // 'BUY' or 'SELL'
+            shares: Number(tx.shares),
+            price: Number(tx.price),
+            fees: Number(tx.fees || 0),
+            tax: Number(tx.tax || 0),
+            date: tx.date
         }));
     },
 
-    async savePortfolio(userId, portfolio) {
+    async savePortfolio(userId, transactions) {
         if (!supabase) return;
 
         try {
             // Get current IDs in DB to handle deletions gracefully
             const { data: existing } = await supabase
-                .from('portfolio_holdings')
+                .from('portfolio_transactions')
                 .select('id')
                 .eq('user_id', userId);
             
             const existingIds = existing?.map(r => r.id) || [];
-            const newPortfolioIds = portfolio.map(h => h.id).filter(Boolean);
+            const newTxIds = transactions.map(t => t.id).filter(Boolean);
 
-            // 1. Delete removed holdings
-            const idsToDelete = existingIds.filter(id => !newPortfolioIds.includes(id));
+            // 1. Delete removed transactions
+            const idsToDelete = existingIds.filter(id => !newTxIds.includes(id));
             if (idsToDelete.length > 0) {
-                const { error: deleteError } = await supabase.from('portfolio_holdings').delete().in('id', idsToDelete);
-                if (deleteError) console.error('Error deleting removed holdings:', deleteError);
+                const { error: deleteError } = await supabase.from('portfolio_transactions').delete().in('id', idsToDelete);
+                if (deleteError) console.error('Error deleting removed transactions:', deleteError);
             }
 
-            // 2. Upsert remaining holdings
-            if (portfolio.length > 0) {
-                const upserts = portfolio.map(holding => ({
-                    id: holding.id, // Use client-generated UUID or existing UUID
+            // 2. Upsert remaining transactions
+            if (transactions.length > 0) {
+                const upserts = transactions.map(tx => ({
+                    id: tx.id,
                     user_id: userId,
-                    symbol: holding.symbol,
-                    shares: holding.shares,
-                    buy_price: holding.buyPrice,
-                    fees: holding.fees || 0,
-                    tax: holding.tax || 0,
-                    buy_date: holding.buyDate
+                    symbol: tx.symbol,
+                    type: tx.type,
+                    shares: tx.shares,
+                    price: tx.price,
+                    fees: tx.fees || 0,
+                    tax: tx.tax || 0,
+                    date: tx.date
                 }));
 
                 const { data, error } = await supabase
-                    .from('portfolio_holdings')
+                    .from('portfolio_transactions')
                     .upsert(upserts, { onConflict: 'id' })
                     .select();
 
                 if (error) {
-                    console.error('Error saving portfolio (ensure fees/tax columns exist in Supabase):', error);
-                    // Return the original portfolio so the local state isn't broken
-                    return portfolio;
+                    console.error('Error saving transactions:', error);
+                    return transactions;
                 }
 
                 return data?.map(row => ({
                     id: row.id,
                     symbol: row.symbol,
+                    type: row.type,
                     shares: Number(row.shares),
-                    buyPrice: Number(row.buy_price),
+                    price: Number(row.price),
                     fees: Number(row.fees || 0),
                     tax: Number(row.tax || 0),
-                    buyDate: row.buy_date
-                })) || portfolio;
+                    date: row.date
+                })) || transactions;
             }
             return [];
         } catch (err) {
-            console.error('Portfolio sync failed:', err);
-            return portfolio; // Return current portfolio so it doesn't get cleared on error
+            console.error('Transactions sync failed:', err);
+            return transactions; 
         }
     }
 };

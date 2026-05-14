@@ -13,8 +13,14 @@ function AppContent() {
   const { activeView, watchlist, portfolio } = state;
   const [showDisclaimer, setShowDisclaimer] = useState(true);
 
-  // Get unique symbols for portfolio view
-  const portfolioSymbols = [...new Set(portfolio.map(h => h.symbol))];
+  // Get unique symbols for portfolio view (only active positions)
+  const portfolioSymbols = [...new Set(portfolio.map(h => h.symbol))].filter(symbol => {
+      const txs = portfolio.filter(t => t.symbol === symbol);
+      const totalShares = txs.reduce((sum, tx) => {
+          return tx.type === 'SELL' ? sum - tx.shares : sum + tx.shares;
+      }, 0);
+      return totalShares > 0;
+  });
 
   // Combine all symbols for the active view
   const symbolsToShow = activeView === 'watchlist'

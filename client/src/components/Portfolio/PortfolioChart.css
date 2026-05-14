@@ -1,0 +1,72 @@
+.portfolio-chart-container {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.chart-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    color: var(--color-text);
+}
+
+.chart-stats {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.chart-filters {
+    display: flex;
+    gap: 8px;
+    background: var(--color-bg-hover);
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.filter-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+    color: var(--color-text);
+}
+
+.filter-btn.active {
+    background: var(--color-bg-card);
+    color: var(--color-text);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.chart-loading, .portfolio-chart-empty {
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+    font-style: italic;
+    background: var(--color-bg-card);
+    border: 1px dashed var(--color-border);
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
