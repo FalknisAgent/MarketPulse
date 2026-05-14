@@ -1,0 +1,196 @@
+.portfolio-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.portfolio-overview-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Gauge Styles */
+.portfolio-gauge-container {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.portfolio-gauge {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.gauge-value-path {
+  transition: stroke-dashoffset 1s ease-out;
+}
+
+.gauge-content {
+  position: absolute;
+  bottom: 15px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gauge-total-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.gauge-total-gain {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gauge-gain-pct {
+  background: var(--color-bg-hover);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.text-success .gauge-gain-pct {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.text-danger .gauge-gain-pct {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+/* Metrics Grid */
+.portfolio-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.metric-box {
+  background: var(--color-bg-hover);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: transform 0.2s;
+}
+
+.metric-box:hover:not(.disabled) {
+  transform: translateY(-2px);
+  background: white;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border-hover);
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.metric-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.metric-box.disabled {
+  opacity: 0.6;
+}
+
+.metric-value.text-muted {
+  color: var(--color-text-muted);
+}
+
+/* Asset Classes */
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.asset-classes {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.asset-class-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.asset-class-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.asset-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.bg-purple {
+  background: #f3e8ff;
+  color: #9333ea;
+}
+
+.fill-purple {
+  background: #9333ea;
+}
+
+.asset-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  flex: 1;
+}
+
+.asset-value {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+}
+
+.asset-bar-bg {
+  height: 4px;
+  background: var(--color-bg-hover);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.asset-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+}

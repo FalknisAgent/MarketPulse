@@ -438,6 +438,23 @@ header.header {
   /* Wide cards */
 }
 
+/* --- PORTFOLIO LAYOUT --- */
+.portfolio-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.portfolio-sidebar {
+  position: sticky;
+  top: 32px;
+}
+
+.portfolio-main {
+  /* Let stocks-list handle its own width inside this column */
+}
+
 /* Disclaimer */
 .app-footer {
   position: absolute;
@@ -578,6 +595,14 @@ header.header {
   .stocks-list {
     grid-template-columns: 1fr !important;
     gap: 12px;
+  }
+
+  .portfolio-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-sidebar {
+    position: static;
   }
 
   /* ── EMPTY STATE ── */

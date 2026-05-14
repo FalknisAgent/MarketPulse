@@ -5,6 +5,7 @@ import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
 import StockCard from './components/StockCard/StockCard';
 import Auth from './components/Auth/Auth';
+import PortfolioOverview from './components/Portfolio/PortfolioOverview';
 import './index.css';
 
 function AppContent() {
@@ -80,6 +81,23 @@ function AppContent() {
                   ? 'Search for stocks above and add them to your watchlist to start tracking.'
                   : 'Add stocks to your watchlist and track your holdings to see them here.'}
               </p>
+            </div>
+          ) : activeView === 'portfolio' ? (
+            <div className="portfolio-layout">
+              <aside className="portfolio-sidebar">
+                <PortfolioOverview />
+              </aside>
+              <div className="portfolio-main">
+                <div className="stocks-list">
+                  {symbolsToShow.map(symbol => (
+                    <StockCard
+                      key={symbol}
+                      symbol={symbol}
+                      showHoldings={true}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
           ) : (
             <div className="stocks-list">
