@@ -1,5 +1,8 @@
 import { supabase } from './supabase';
 
+let isSavingWatchlist = false;
+let pendingWatchlist = null;
+
 export const cloudStorage = {
     async getWatchlist(userId) {
         if (!supabase) return [];
@@ -12,15 +15,38 @@ export const cloudStorage = {
             console.error('Error fetching watchlist:', error);
             return [];
         }
-        return data.map(item => item.symbol);
+        // Deduplicate on read just in case
+        return [...new Set(data.map(item => item.symbol))];
     },
 
     async saveWatchlist(userId, symbols) {
         if (!supabase) return;
-        await supabase.from('watchlists').delete().eq('user_id', userId);
-        if (symbols.length > 0) {
-            const inserts = symbols.map(symbol => ({ user_id: userId, symbol }));
-            await supabase.from('watchlists').insert(inserts);
+
+        // Deduplicate locally
+        const uniqueSymbols = [...new Set(symbols)];
+        
+        pendingWatchlist = uniqueSymbols;
+        if (isSavingWatchlist) return;
+        
+        isSavingWatchlist = true;
+        
+        try {
+            while (pendingWatchlist !== null) {
+                const currentSymbols = pendingWatchlist;
+                pendingWatchlist = null;
+                
+                // Await delete completely before inserting to prevent race conditions
+                const { error: delError } = await supabase.from('watchlists').delete().eq('user_id', userId);
+                if (delError) console.error('Watchlist delete error:', delError);
+                
+                if (currentSymbols.length > 0) {
+                    const inserts = currentSymbols.map(symbol => ({ user_id: userId, symbol }));
+                    const { error: insError } = await supabase.from('watchlists').insert(inserts);
+                    if (insError) console.error('Watchlist insert error:', insError);
+                }
+            }
+        } finally {
+            isSavingWatchlist = false;
         }
     },
 
