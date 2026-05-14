@@ -49,50 +49,61 @@ export const cloudStorage = {
     async savePortfolio(userId, portfolio) {
         if (!supabase) return;
 
-        // Delete existing holdings for this user
-        const { error: deleteError } = await supabase
-            .from('portfolio_holdings')
-            .delete()
-            .eq('user_id', userId);
-
-        if (deleteError) {
-            console.error('Error clearing portfolio:', deleteError);
-            return;
-        }
-
-        if (portfolio.length > 0) {
-            // Omit client-side 'id' — let Supabase auto-generate UUIDs
-            const inserts = portfolio.map(holding => ({
-                user_id: userId,
-                symbol: holding.symbol,
-                shares: holding.shares,
-                buy_price: holding.buyPrice,
-                fees: holding.fees || 0,
-                tax: holding.tax || 0,
-                buy_date: holding.buyDate
-            }));
-
-            const { data, error: insertError } = await supabase
+        try {
+            // Get current IDs in DB to handle deletions gracefully
+            const { data: existing } = await supabase
                 .from('portfolio_holdings')
-                .insert(inserts)
-                .select();   // Return inserted rows so we get the generated UUIDs
+                .select('id')
+                .eq('user_id', userId);
+            
+            const existingIds = existing?.map(r => r.id) || [];
+            const newPortfolioIds = portfolio.map(h => h.id).filter(Boolean);
 
-            if (insertError) {
-                console.error('Error saving portfolio:', insertError);
-                return null;
+            // 1. Delete removed holdings
+            const idsToDelete = existingIds.filter(id => !newPortfolioIds.includes(id));
+            if (idsToDelete.length > 0) {
+                const { error: deleteError } = await supabase.from('portfolio_holdings').delete().in('id', idsToDelete);
+                if (deleteError) console.error('Error deleting removed holdings:', deleteError);
             }
 
-            // Return the saved holdings with their Supabase-generated IDs
-            return data?.map(row => ({
-                id: row.id,
-                symbol: row.symbol,
-                shares: Number(row.shares),
-                buyPrice: Number(row.buy_price),
-                fees: Number(row.fees || 0),
-                tax: Number(row.tax || 0),
-                buyDate: row.buy_date
-            })) || null;
+            // 2. Upsert remaining holdings
+            if (portfolio.length > 0) {
+                const upserts = portfolio.map(holding => ({
+                    id: holding.id, // Use client-generated UUID or existing UUID
+                    user_id: userId,
+                    symbol: holding.symbol,
+                    shares: holding.shares,
+                    buy_price: holding.buyPrice,
+                    fees: holding.fees || 0,
+                    tax: holding.tax || 0,
+                    buy_date: holding.buyDate
+                }));
+
+                const { data, error } = await supabase
+                    .from('portfolio_holdings')
+                    .upsert(upserts, { onConflict: 'id' })
+                    .select();
+
+                if (error) {
+                    console.error('Error saving portfolio (ensure fees/tax columns exist in Supabase):', error);
+                    // Return the original portfolio so the local state isn't broken
+                    return portfolio;
+                }
+
+                return data?.map(row => ({
+                    id: row.id,
+                    symbol: row.symbol,
+                    shares: Number(row.shares),
+                    buyPrice: Number(row.buy_price),
+                    fees: Number(row.fees || 0),
+                    tax: Number(row.tax || 0),
+                    buyDate: row.buy_date
+                })) || portfolio;
+            }
+            return [];
+        } catch (err) {
+            console.error('Portfolio sync failed:', err);
+            return portfolio; // Return current portfolio so it doesn't get cleared on error
         }
-        return [];
     }
 };

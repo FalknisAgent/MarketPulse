@@ -21,6 +21,8 @@ CREATE TABLE portfolio_holdings (
   symbol text NOT NULL,
   shares numeric NOT NULL,
   buy_price numeric NOT NULL,
+  fees numeric DEFAULT 0,
+  tax numeric DEFAULT 0,
   buy_date date,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now()
