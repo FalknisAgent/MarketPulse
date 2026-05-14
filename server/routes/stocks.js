@@ -138,6 +138,29 @@ router.get('/financials/:symbol', guestLimitCheck, async (req, res) => {
 });
 
 /**
+ * GET /api/quick/:symbol
+ * Get just the quote for a stock (fast — for initial render)
+ */
+router.get('/quick/:symbol', guestLimitCheck, async (req, res) => {
+    try {
+        const { symbol } = req.params;
+
+        if (!yahooFinance.isValidSymbol(symbol)) {
+            return res.status(400).json({ error: 'Invalid stock symbol' });
+        }
+
+        const quote = await yahooFinance.getQuote(symbol);
+        res.json(quote);
+    } catch (error) {
+        console.error('Quick quote error:', error.message);
+        if (error.message.includes('not found') || error.message.includes('No results')) {
+            return res.status(404).json({ error: 'Stock not found' });
+        }
+        res.status(500).json({ error: 'Failed to fetch quote' });
+    }
+});
+
+/**
  * GET /api/full/:symbol
  * Get all data for a stock (quote + financials + historical)
  */

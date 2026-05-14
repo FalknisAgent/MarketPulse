@@ -119,10 +119,10 @@ function StockCard({ symbol, showHoldings = false }) {
 
                 {/* 2. Price & Change */}
                 <div className="stock-price-section" onClick={handleToggleExpand}>
-                    {isLoading ? (
+                    {isLoading && !quote?.price ? (
                         <div className="skeleton" style={{ width: 100, height: 24 }}></div>
                     ) : quote?.price ? (
-                        <>
+                        <div style={{ opacity: isLoading ? 0.7 : 1, transition: 'opacity 0.2s' }}>
                             <span className="current-price">{fmt(quote.price, quote.currency)}</span>
                             {quote.currency && quote.currency !== selectedCurrency && (
                                 <span className="native-currency-badge">{quote.currency}</span>
@@ -130,7 +130,7 @@ function StockCard({ symbol, showHoldings = false }) {
                             <span className={`price-change-badge ${getPriceChangeClass()}`}>
                                 {quote.change >= 0 ? '+' : ''}{fmt(quote.change, quote.currency)} ({quote.changePercent?.toFixed(2)}%)
                             </span>
-                        </>
+                        </div>
                     ) : (
                         <span className="text-muted">--</span>
                     )}

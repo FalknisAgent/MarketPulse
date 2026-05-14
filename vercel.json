@@ -13,6 +13,7 @@
         { "source": "/api/fx/:pair", "destination": "/api/fx/[pair].js" },
         { "source": "/api/search", "destination": "/api/search.js" },
         { "source": "/api/health", "destination": "/api/health.js" },
+        { "source": "/api/quick/:symbol", "destination": "/api/quick/[symbol].js" },
         { "source": "/api/full/:symbol", "destination": "/api/full/[symbol].js" },
         { "source": "/api/quote/:symbol", "destination": "/api/quote/[symbol].js" },
         { "source": "/api/financials/:symbol", "destination": "/api/financials/[symbol].js" },

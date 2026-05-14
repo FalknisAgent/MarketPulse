@@ -67,6 +67,15 @@ export async function searchStocks(query) {
 }
 
 /**
+ * Get stock quote (quick — for instant initial render)
+ * @param {string} symbol - Stock symbol
+ * @returns {Promise<Object>} Stock quote data
+ */
+export async function getQuickQuote(symbol) {
+    return fetchAPI(`/quick/${symbol.toUpperCase()}`);
+}
+
+/**
  * Get stock quote
  * @param {string} symbol - Stock symbol
  * @returns {Promise<Object>} Stock quote data

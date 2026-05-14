@@ -314,19 +314,6 @@ export function AppProvider({ children }) {
     const fetchStockData = useCallback(async (symbol, forceRefresh = false) => {
         const upperSymbol = symbol.toUpperCase();
 
-        // Check cache unless forcing refresh
-        if (!forceRefresh) {
-            const cached = storage.getCachedData(upperSymbol);
-            // Verify cache has required full data (financials and score)
-            if (cached && cached.financials && cached.buffettScore) {
-                dispatch({
-                    type: ACTIONS.SET_STOCK_DATA,
-                    payload: { symbol: upperSymbol, data: cached }
-                });
-                return cached;
-            }
-        }
-
         // Enforce Local Guest Limit
         if (!state.user) {
             let checkedStocks = JSON.parse(localStorage.getItem('moatwise_guest_checked') || '[]');
@@ -341,9 +328,47 @@ export function AppProvider({ children }) {
             }
         }
 
+        // Check cache unless forcing refresh
+        const cachedState = storage.getCachedData(upperSymbol);
+        let hasValidCache = false;
+
+        if (!forceRefresh && cachedState) {
+            const { data, isFresh, isStale } = cachedState;
+            // Verify cache has required full data (financials and score)
+            if (data && data.financials && data.buffettScore) {
+                dispatch({
+                    type: ACTIONS.SET_STOCK_DATA,
+                    payload: { symbol: upperSymbol, data }
+                });
+                hasValidCache = true;
+
+                if (isFresh) {
+                    return data; // Fully fresh, no need to fetch
+                }
+                // If stale, we show the data immediately but proceed to fetch in background
+            }
+        }
+
         dispatch({ type: ACTIONS.SET_STOCK_LOADING, payload: upperSymbol });
 
         try {
+            // PHASE 1: Quick Quote
+            // Only if we don't have a valid cache, we fetch the quick quote to show something immediately
+            if (!hasValidCache) {
+                try {
+                    const quote = await api.getQuickQuote(upperSymbol);
+                    dispatch({
+                        type: ACTIONS.SET_STOCK_DATA,
+                        payload: { symbol: upperSymbol, data: { quote, loading: true } }
+                    });
+                    storage.setCachedQuote(upperSymbol, quote);
+                } catch (err) {
+                    if (err.isPaywall) throw err;
+                    console.warn(`Quick quote failed for ${upperSymbol}:`, err.message);
+                }
+            }
+
+            // PHASE 2: Background Full Fetch
             const data = await api.getFullStockData(upperSymbol);
             const buffettScore = calculateBuffettScore(data.financials, data.quote);
 
@@ -379,7 +404,7 @@ export function AppProvider({ children }) {
             }
             throw error;
         }
-    }, [dispatch]);
+    }, [dispatch, state.user]);
 
     // Refresh all stocks
     const refreshAllStocks = useCallback(async () => {

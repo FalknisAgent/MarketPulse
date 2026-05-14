@@ -6,6 +6,11 @@ const STORAGE_KEYS = {
     LAST_UPDATE: 'moatwise_last_update'
 };
 
+// Cache freshness thresholds
+const CACHE_FRESH_MS = 5 * 60 * 1000;   // 5 minutes — data considered fresh
+const CACHE_STALE_MS = 24 * 60 * 60 * 1000; // 24 hours — data considered usable-but-stale
+const CACHE_DEAD_MS  = 7 * 24 * 60 * 60 * 1000; // 7 days — data evicted
+
 /**
  * Safe JSON parse
  */
@@ -108,9 +113,11 @@ export function removeHolding(id) {
 }
 
 /**
- * Get cached stock data
- * @param {string} symbol - Stock symbol
- * @returns {Object|null} Cached data or null
+ * Get cached stock data with staleness information.
+ * Returns { data, isFresh, isStale } or null if no cache exists / too old.
+ * - isFresh: data is < 5 min old — no refetch needed
+ * - isStale: data is 5 min–24 h old — show immediately, refetch in background
+ * - null: data is > 7 days or doesn't exist
  */
 export function getCachedData(symbol) {
     const cache = safeJSONParse(localStorage.getItem(STORAGE_KEYS.CACHE), {});
@@ -118,13 +125,16 @@ export function getCachedData(symbol) {
 
     if (!entry) return null;
 
-    // Check if cache is older than 24 hours
-    const cacheAge = Date.now() - entry.timestamp;
-    if (cacheAge > 24 * 60 * 60 * 1000) {
-        return null;
-    }
+    const age = Date.now() - entry.timestamp;
 
-    return entry.data;
+    // Too old — treat as no cache
+    if (age > CACHE_DEAD_MS) return null;
+
+    return {
+        data: entry.data,
+        isFresh: age < CACHE_FRESH_MS,
+        isStale: age >= CACHE_FRESH_MS
+    };
 }
 
 /**
@@ -165,6 +175,30 @@ export function setCachedData(symbol, data) {
         } else {
             console.error('Cache error:', err);
         }
+    }
+}
+
+/**
+ * Update only the quote portion of a cached entry (for quick-quote phase).
+ */
+export function setCachedQuote(symbol, quote) {
+    try {
+        const cache = safeJSONParse(localStorage.getItem(STORAGE_KEYS.CACHE), {});
+        const upper = symbol.toUpperCase();
+        const existing = cache[upper];
+
+        cache[upper] = {
+            timestamp: existing?.timestamp || Date.now(),
+            data: {
+                ...(existing?.data || {}),
+                quote
+            }
+        };
+
+        localStorage.setItem(STORAGE_KEYS.CACHE, JSON.stringify(cache));
+    } catch (err) {
+        // Silently ignore — quote cache update is non-critical
+        console.warn('setCachedQuote error:', err.message);
     }
 }
 

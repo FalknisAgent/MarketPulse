@@ -1,4 +1,5 @@
 const YahooFinance = require('yahoo-finance2').default;
+const { cache, CACHE_TTL } = require('./cache');
 
 const yahooFinance = new YahooFinance({
     validation: {
@@ -23,17 +24,23 @@ const sanitizeSymbol = (symbol) => {
 };
 
 /**
- * Get real-time quote for a stock
+ * Get real-time quote for a stock (with cache)
  */
 async function getQuote(symbol) {
-    try {
-        const sanitized = sanitizeSymbol(symbol);
-        if (!isValidSymbol(sanitized)) {
-            throw new Error('Invalid symbol format');
-        }
+    const sanitized = sanitizeSymbol(symbol);
+    if (!isValidSymbol(sanitized)) {
+        throw new Error('Invalid symbol format');
+    }
 
+    const cacheKey = `quote:${sanitized}`;
+    const cached = cache.get(cacheKey);
+    if (cached) {
+        return cached;
+    }
+
+    try {
         const quote = await yahooFinance.quote(sanitized, {}, NO_VALIDATE);
-        return {
+        const result = {
             symbol: quote.symbol,
             shortName: quote.shortName || quote.longName,
             longName: quote.longName,
@@ -59,6 +66,9 @@ async function getQuote(symbol) {
             currency: quote.currency,
             quoteType: quote.quoteType
         };
+
+        cache.set(cacheKey, result, CACHE_TTL.QUOTE);
+        return result;
     } catch (error) {
         console.error(`Error fetching quote for ${symbol}:`, error.message);
         throw error;
@@ -66,15 +76,21 @@ async function getQuote(symbol) {
 }
 
 /**
- * Get historical price data
+ * Get historical price data (with cache)
  */
 async function getHistoricalData(symbol, period = 'max') {
-    try {
-        const sanitized = sanitizeSymbol(symbol);
-        if (!isValidSymbol(sanitized)) {
-            throw new Error('Invalid symbol format');
-        }
+    const sanitized = sanitizeSymbol(symbol);
+    if (!isValidSymbol(sanitized)) {
+        throw new Error('Invalid symbol format');
+    }
 
+    const cacheKey = `historical:${sanitized}:${period}`;
+    const cached = cache.get(cacheKey);
+    if (cached) {
+        return cached;
+    }
+
+    try {
         const periodMap = {
             '1m': { period1: getDateNMonthsAgo(1), period2: new Date() },
             '3m': { period1: getDateNMonthsAgo(3), period2: new Date() },
@@ -93,7 +109,7 @@ async function getHistoricalData(symbol, period = 'max') {
             interval: period === '1m' ? '1d' : '1wk'
         }, NO_VALIDATE);
 
-        return {
+        const data = {
             symbol: sanitized,
             quotes: result.quotes.map(q => ({
                 date: q.date,
@@ -104,6 +120,9 @@ async function getHistoricalData(symbol, period = 'max') {
                 volume: q.volume
             }))
         };
+
+        cache.set(cacheKey, data, CACHE_TTL.HISTORICAL);
+        return data;
     } catch (error) {
         console.error(`Error fetching historical data for ${symbol}:`, error.message);
         throw error;
@@ -111,15 +130,21 @@ async function getHistoricalData(symbol, period = 'max') {
 }
 
 /**
- * Get financial statements and key metrics
+ * Get financial statements and key metrics (with cache)
  */
 async function getFinancials(symbol) {
-    try {
-        const sanitized = sanitizeSymbol(symbol);
-        if (!isValidSymbol(sanitized)) {
-            throw new Error('Invalid symbol format');
-        }
+    const sanitized = sanitizeSymbol(symbol);
+    if (!isValidSymbol(sanitized)) {
+        throw new Error('Invalid symbol format');
+    }
 
+    const cacheKey = `financials:${sanitized}`;
+    const cached = cache.get(cacheKey);
+    if (cached) {
+        return cached;
+    }
+
+    try {
         const allModules = [
             'financialData',
             'defaultKeyStatistics',
@@ -166,7 +191,7 @@ async function getFinancials(symbol) {
 
         const fullSummary = batchedResult || {};
 
-        return {
+        const data = {
             symbol: sanitized,
             financialData: fullSummary.financialData || {},
             keyStatistics: fullSummary.defaultKeyStatistics || {},
@@ -182,6 +207,9 @@ async function getFinancials(symbol) {
             recommendations: fullSummary.recommendationTrend?.trend || [],
             fundamentalsTimeSeries: fundamentals
         };
+
+        cache.set(cacheKey, data, CACHE_TTL.FINANCIALS);
+        return data;
     } catch (error) {
         console.error(`Error fetching financials for ${symbol}:`, error.message);
         throw error;
@@ -189,18 +217,24 @@ async function getFinancials(symbol) {
 }
 
 /**
- * Search for stocks
+ * Search for stocks (with cache)
  */
 async function searchStocks(query) {
-    try {
-        const sanitizedQuery = query.replace(/[<>\"'&]/g, '').slice(0, 50);
+    const sanitizedQuery = query.replace(/[<>\\"'&]/g, '').slice(0, 50);
 
+    const cacheKey = `search:${sanitizedQuery.toLowerCase()}`;
+    const cached = cache.get(cacheKey);
+    if (cached) {
+        return cached;
+    }
+
+    try {
         const results = await yahooFinance.search(sanitizedQuery, {
             quotesCount: 10,
             newsCount: 0
         });
 
-        return results.quotes
+        const data = results.quotes
             .filter(q => q.quoteType === 'EQUITY')
             .map(q => ({
                 symbol: q.symbol,
@@ -209,6 +243,9 @@ async function searchStocks(query) {
                 exchange: q.exchange,
                 quoteType: q.quoteType
             }));
+
+        cache.set(cacheKey, data, CACHE_TTL.SEARCH);
+        return data;
     } catch (error) {
         console.error(`Error searching for ${query}:`, error.message);
         throw error;

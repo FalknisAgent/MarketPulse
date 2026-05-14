@@ -12,6 +12,33 @@ const yahooFinance = new YahooFinance({
 // (non-US stocks like SIKA.SW return extra/unexpected fields that fail validation)
 const NO_VALIDATE = { validateResult: false };
 
+// ── Simple in-memory cache for Vercel warm instances ──
+// Vercel serverless functions are ephemeral, but warm instances reuse the
+// module scope. This cache helps when a user hits the same stock rapidly.
+const _cache = new Map();
+const CACHE_TTL = {
+    QUOTE: 5 * 60 * 1000,
+    FINANCIALS: 30 * 60 * 1000,
+    HISTORICAL: 15 * 60 * 1000,
+    SEARCH: 10 * 60 * 1000
+};
+
+function cacheGet(key) {
+    const entry = _cache.get(key);
+    if (!entry) return null;
+    if (Date.now() > entry.expiresAt) { _cache.delete(key); return null; }
+    return entry.value;
+}
+
+function cacheSet(key, value, ttlMs) {
+    // Cap cache size to prevent memory leaks in long-lived warm instances
+    if (_cache.size > 200) {
+        const oldest = _cache.keys().next().value;
+        _cache.delete(oldest);
+    }
+    _cache.set(key, { value, expiresAt: Date.now() + ttlMs });
+}
+
 const isValidSymbol = (symbol) => {
     return /^[A-Z0-9.-]{1,10}$/.test(symbol.toUpperCase());
 };
@@ -23,8 +50,13 @@ const sanitizeSymbol = (symbol) => {
 async function getQuote(symbol) {
     const sanitized = sanitizeSymbol(symbol);
     if (!isValidSymbol(sanitized)) throw new Error('Invalid symbol format');
+
+    const ck = `quote:${sanitized}`;
+    const cached = cacheGet(ck);
+    if (cached) return cached;
+
     const quote = await yahooFinance.quote(sanitized, {}, NO_VALIDATE);
-    return {
+    const result = {
         symbol: quote.symbol,
         shortName: quote.shortName || quote.longName,
         longName: quote.longName,
@@ -50,11 +82,17 @@ async function getQuote(symbol) {
         currency: quote.currency,
         quoteType: quote.quoteType
     };
+    cacheSet(ck, result, CACHE_TTL.QUOTE);
+    return result;
 }
 
 async function getHistoricalData(symbol, period = 'max') {
     const sanitized = sanitizeSymbol(symbol);
     if (!isValidSymbol(sanitized)) throw new Error('Invalid symbol format');
+
+    const ck = `historical:${sanitized}:${period}`;
+    const cached = cacheGet(ck);
+    if (cached) return cached;
 
     const now = new Date();
     const getMonthsAgo = (n) => { const d = new Date(); d.setMonth(d.getMonth() - n); return d; };
@@ -75,18 +113,25 @@ async function getHistoricalData(symbol, period = 'max') {
         period2: dateRange.period2,
         interval: period === '1m' ? '1d' : '1wk'
     }, NO_VALIDATE);
-    return {
+
+    const data = {
         symbol: sanitized,
         quotes: result.quotes.map(q => ({
             date: q.date, open: q.open, high: q.high,
             low: q.low, close: q.close, volume: q.volume
         }))
     };
+    cacheSet(ck, data, CACHE_TTL.HISTORICAL);
+    return data;
 }
 
 async function getFinancials(symbol) {
     const sanitized = sanitizeSymbol(symbol);
     if (!isValidSymbol(sanitized)) throw new Error('Invalid symbol format');
+
+    const ck = `financials:${sanitized}`;
+    const cached = cacheGet(ck);
+    if (cached) return cached;
 
     const allModules = [
         'financialData', 'defaultKeyStatistics', 'assetProfile', 'summaryDetail',
@@ -119,7 +164,7 @@ async function getFinancials(symbol) {
 
     const fullSummary = batchedResult || {};
 
-    return {
+    const data = {
         symbol: sanitized,
         financialData: fullSummary.financialData || {},
         keyStatistics: fullSummary.defaultKeyStatistics || {},
@@ -135,12 +180,19 @@ async function getFinancials(symbol) {
         recommendations: fullSummary.recommendationTrend?.trend || [],
         fundamentalsTimeSeries: fundamentals
     };
+    cacheSet(ck, data, CACHE_TTL.FINANCIALS);
+    return data;
 }
 
 async function searchStocks(query) {
     const sanitizedQuery = query.replace(/[<>"'&]/g, '').slice(0, 50);
+
+    const ck = `search:${sanitizedQuery.toLowerCase()}`;
+    const cached = cacheGet(ck);
+    if (cached) return cached;
+
     const results = await yahooFinance.search(sanitizedQuery, { quotesCount: 10, newsCount: 0 }, NO_VALIDATE);
-    return results.quotes
+    const data = results.quotes
         .filter(q => q.quoteType === 'EQUITY')
         .map(q => ({
             symbol: q.symbol,
@@ -149,6 +201,8 @@ async function searchStocks(query) {
             exchange: q.exchange,
             quoteType: q.quoteType
         }));
+    cacheSet(ck, data, CACHE_TTL.SEARCH);
+    return data;
 }
 
 module.exports = { getQuote, getHistoricalData, getFinancials, searchStocks, isValidSymbol };
