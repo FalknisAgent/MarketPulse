@@ -63,6 +63,25 @@ router.get('/search', async (req, res) => {
 });
 
 /**
+ * GET /api/fx/:pair
+ * Get exchange rate for a currency pair (e.g. USDEUR)
+ */
+router.get('/fx/:pair', async (req, res) => {
+    try {
+        const { pair } = req.params;
+        if (!pair || pair.length !== 6) {
+            return res.status(400).json({ error: 'Invalid currency pair. Expected format: USDEUR' });
+        }
+        
+        const rate = await yahooFinance.getFxRate(pair);
+        res.json({ from: pair.slice(0,3), to: pair.slice(3,6), rate, timestamp: new Date().toISOString() });
+    } catch (error) {
+        console.error('FX route error:', error.message);
+        res.status(500).json({ error: `Failed to fetch exchange rate for ${req.params.pair}` });
+    }
+});
+
+/**
  * GET /api/quote/:symbol
  * Get current quote for a stock
  */

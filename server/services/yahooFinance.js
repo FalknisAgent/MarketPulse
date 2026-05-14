@@ -252,6 +252,32 @@ async function searchStocks(query) {
     }
 }
 
+/**
+ * Get FX exchange rate (with cache)
+ */
+async function getFxRate(pair) {
+    const from = pair.slice(0, 3).toUpperCase();
+    const to = pair.slice(3, 6).toUpperCase();
+    if (from === to) return 1;
+
+    const cacheKey = `fx:${from}${to}`;
+    const cached = cache.get(cacheKey);
+    if (cached) return cached;
+
+    try {
+        const ticker = `${from}${to}=X`;
+        const quote = await yahooFinance.quote(ticker, {}, NO_VALIDATE);
+        const rate = quote.regularMarketPrice;
+        if (!rate || isNaN(rate)) throw new Error('No rate returned');
+
+        cache.set(cacheKey, rate, CACHE_TTL.QUOTE); // Cache FX rate for 5 mins
+        return rate;
+    } catch (error) {
+        console.error(`Error fetching FX rate for ${pair}:`, error.message);
+        throw error;
+    }
+}
+
 // Helper functions
 function getDateNMonthsAgo(n) {
     const date = new Date();
@@ -270,6 +296,7 @@ module.exports = {
     getHistoricalData,
     getFinancials,
     searchStocks,
+    getFxRate,
     isValidSymbol,
     sanitizeSymbol
 };

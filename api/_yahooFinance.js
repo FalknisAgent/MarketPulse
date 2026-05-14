@@ -205,4 +205,22 @@ async function searchStocks(query) {
     return data;
 }
 
-module.exports = { getQuote, getHistoricalData, getFinancials, searchStocks, isValidSymbol };
+async function getFxRate(pair) {
+    const from = pair.slice(0, 3).toUpperCase();
+    const to = pair.slice(3, 6).toUpperCase();
+    if (from === to) return 1;
+
+    const ck = `fx:${from}${to}`;
+    const cached = cacheGet(ck);
+    if (cached) return cached;
+
+    const ticker = `${from}${to}=X`;
+    const quote = await yahooFinance.quote(ticker, {}, NO_VALIDATE);
+    const rate = quote.regularMarketPrice;
+    if (!rate || isNaN(rate)) throw new Error('No rate returned');
+
+    cacheSet(ck, rate, CACHE_TTL.QUOTE);
+    return rate;
+}
+
+module.exports = { getQuote, getHistoricalData, getFinancials, searchStocks, getFxRate, isValidSymbol };

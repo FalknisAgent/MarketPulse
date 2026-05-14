@@ -4,11 +4,10 @@
  * Rates are cached in-memory for 10 minutes to avoid excessive API calls.
  */
 
-const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
-const rateCache = new Map(); // key: "USDEUR" → { rate, expiresAt }
 
 /**
- * Fetch exchange rate from API (with in-memory caching)
+ * Fetch exchange rate from API
+ * Relies on server-side cache (5 mins) for freshness and performance.
  * @param {string} from - Source currency (e.g. "USD")
  * @param {string} to   - Target currency (e.g. "EUR")
  * @returns {Promise<number>} Exchange rate
@@ -20,21 +19,11 @@ export async function fetchRate(from, to) {
     const toUpper = to.toUpperCase();
     const key = `${fromUpper}${toUpper}`;
 
-    // Return cached rate if still fresh
-    const cached = rateCache.get(key);
-    if (cached && Date.now() < cached.expiresAt) {
-        return cached.rate;
-    }
-
     try {
         const response = await fetch(`/api/fx/${key}`);
         if (!response.ok) throw new Error(`FX API error: ${response.status}`);
         const data = await response.json();
-        const rate = data.rate;
-
-        // Cache the result
-        rateCache.set(key, { rate, expiresAt: Date.now() + CACHE_TTL_MS });
-        return rate;
+        return data.rate;
     } catch (error) {
         console.error(`Failed to fetch FX rate ${key}:`, error.message);
         return 1; // Fallback: no conversion
