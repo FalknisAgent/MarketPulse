@@ -73,8 +73,16 @@ function appReducer(state, action) {
         case ACTIONS.SET_EXPANDED:
             return { ...state, expandedStock: action.payload };
 
-        case ACTIONS.SET_AUTH:
-            return { ...state, user: action.payload.user, session: action.payload.session };
+        case ACTIONS.SET_AUTH: {
+            const isNewUser = action.payload.user?.id !== state.user?.id;
+            return { 
+                ...state, 
+                user: action.payload.user, 
+                session: action.payload.session,
+                // Immediately block cloud syncing when user identity changes to prevent wiping cloud data
+                isCloudSynced: isNewUser ? false : state.isCloudSynced
+            };
+        }
 
         case ACTIONS.SET_WATCHLIST:
             return { ...state, watchlist: action.payload };
@@ -226,8 +234,6 @@ export function AppProvider({ children }) {
     }, []);
 
     useEffect(() => {
-        dispatch({ type: ACTIONS.SET_CLOUD_SYNCED, payload: false });
-
         if (state.user) {
             const loadCloudData = async () => {
                 const cloudWatchlist = await cloudStorage.getWatchlist(state.user.id);
