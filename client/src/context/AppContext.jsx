@@ -30,6 +30,9 @@ const initialState = {
     // Currency
     selectedCurrency: 'USD',
     fxRates: { USD: 1 }, // conversion rates: 1 unit of currency → USD
+
+    // Sync State
+    isCloudSynced: false,
 };
 
 // Action types
@@ -54,7 +57,8 @@ const ACTIONS = {
     SET_ERROR: 'SET_ERROR',
     CLEAR_ERROR: 'CLEAR_ERROR',
     SET_CURRENCY: 'SET_CURRENCY',
-    SET_FX_RATES: 'SET_FX_RATES'
+    SET_FX_RATES: 'SET_FX_RATES',
+    SET_CLOUD_SYNCED: 'SET_CLOUD_SYNCED'
 };
 
 // Reducer
@@ -173,6 +177,9 @@ function appReducer(state, action) {
         case ACTIONS.SET_FX_RATES:
             return { ...state, fxRates: { ...state.fxRates, ...action.payload } };
 
+        case ACTIONS.SET_CLOUD_SYNCED:
+            return { ...state, isCloudSynced: action.payload };
+
         default:
             return state;
     }
@@ -219,6 +226,8 @@ export function AppProvider({ children }) {
     }, []);
 
     useEffect(() => {
+        dispatch({ type: ACTIONS.SET_CLOUD_SYNCED, payload: false });
+
         if (state.user) {
             const loadCloudData = async () => {
                 const cloudWatchlist = await cloudStorage.getWatchlist(state.user.id);
@@ -240,18 +249,23 @@ export function AppProvider({ children }) {
                 } else {
                      dispatch({ type: ACTIONS.SET_PORTFOLIO, payload: cloudPortfolio });
                 }
+
+                dispatch({ type: ACTIONS.SET_CLOUD_SYNCED, payload: true });
             };
             loadCloudData();
         } else {
              dispatch({ type: ACTIONS.SET_WATCHLIST, payload: storage.getWatchlist() });
              dispatch({ type: ACTIONS.SET_PORTFOLIO, payload: storage.getPortfolio() });
+             dispatch({ type: ACTIONS.SET_CLOUD_SYNCED, payload: true });
         }
     }, [state.user]);
 
     useEffect(() => {
+        if (!state.isCloudSynced) return;
+
         if (state.user) { cloudStorage.saveWatchlist(state.user.id, state.watchlist); } 
         else { storage.saveWatchlist(state.watchlist); }
-    }, [state.watchlist, state.user]);
+    }, [state.watchlist, state.user, state.isCloudSynced]);
 
     // FX Rate Management
     const refreshFXRates = useCallback(async () => {
@@ -294,6 +308,8 @@ export function AppProvider({ children }) {
     }, [refreshFXRates]);
 
     useEffect(() => {
+        if (!state.isCloudSynced) return;
+
         if (state.user) {
             cloudStorage.savePortfolio(state.user.id, state.portfolio).then(savedHoldings => {
                 // Reconcile Supabase-generated UUIDs back into local state
@@ -308,7 +324,7 @@ export function AppProvider({ children }) {
         } else {
             storage.savePortfolio(state.portfolio);
         }
-    }, [state.portfolio, state.user]);
+    }, [state.portfolio, state.user, state.isCloudSynced]);
 
     // Fetch stock data
     const fetchStockData = useCallback(async (symbol, forceRefresh = false) => {
